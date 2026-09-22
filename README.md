@@ -30,15 +30,15 @@
 
 ### Analyse fonctionnelle
 
-- DigiWeb-Audit-Master-Roadmap.md
-- DigiWeb-Audit-Trail-and-Reporting-Requirements.md
-- DigiWeb-Audit-Data-Model.md
-- DigiWeb-Audit-Event-Catalog.md
-- DigiWeb-Audit-Coverage-Matrix.md
-- DigiWeb-Audit-Prioritization.md
-- DigiWeb-Audit-Reports-Specifications.md
+- [DigiWeb-Audit-Master-Roadmap](./DigiWeb-Audit-Master-Roadmap.md)
+- [DigiWeb-Audit-Trail-and-Reporting-Requirements](./DigiWeb-Audit-Trail-and-Reporting-Requirements.md)
+- [DigiWeb-Audit-Data-Model](./DigiWeb-Audit-Data-Model.md)
+- [DigiWeb-Audit-Event-Catalog](./DigiWeb-Audit-Event-Catalog.md)
+- [DigiWeb-Audit-Coverage-Matrix](./DigiWeb-Audit-Coverage-Matrix.md)
+- [DigiWeb-Audit-Prioritization](./DigiWeb-Audit-Prioritization.md)
+- [DigiWeb-Audit-Reports-Specifications](./DigiWeb-Audit-Reports-Specifications.md)
 
-### Architecture et gouvernance
+### Architecture
 
 - DigiWeb-Audit-Trail-Architecture.md
 
@@ -94,7 +94,16 @@ Mettre en place un système d'audit centralisé dans DigiWeb/Synnefo permettant 
 
 ## Travaux en cours
 
-- [ ] Concevoir l'architecture du système d'audit
+📍 Audit Trail Architecture
+
+Objectifs :
+
+- Définir le Audit Service
+- Définir le stockage des événements
+- Définir la stratégie d'indexation
+- Définir les mécanismes de recherche
+- Définir les API de consultation
+- Définir les impacts de performance
 
 ---
 
