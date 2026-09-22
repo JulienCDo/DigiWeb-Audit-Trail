@@ -2,7 +2,7 @@
 
 ![Static Badge](https://img.shields.io/badge/Status-Analysis_Completed-green)
 ![Architecture](https://img.shields.io/badge/Architecture-In_progress-blue)
-![RFP Coverage](https://img.shields.io/badge/RFP_Coverage-100%-green)
+![RFP Coverage](https://img.shields.io/badge/RFP_Coverage-Complete-green)
 ![Phase](https://img.shields.io/badge/Current_Phase-Architecture-orange)
 
 ## Objectif
