@@ -8,18 +8,6 @@
 
 ---
 
-## Prochaine étape
-
-### DigiWeb-Audit-Trail-Architecture.md
-
-L'objectif est de définir :
-
-- Le service d'audit (Audit Service)
-- La stratégie de stockage
-- La structure de la base de données
-- Les mécanismes d'écriture des événements
-- Les index et la recherche
-- Les 
 ## Phase 1 - Conception
 ### Étape 1 - Définir le modèle d'audit central
 #### Objectif
