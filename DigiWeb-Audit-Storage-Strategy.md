@@ -1,5 +1,11 @@
 # DigiWeb Audit Trail - Audit Storage Strategy
 
+## Statut
+
+🔄 Proposition à valider
+
+Dernière mise à jour : 2026-09-22
+
 ## Objectif
 
 Définir une stratégie de stockage des événements d'audit permettant :
@@ -108,9 +114,11 @@ Chaque événement d'audit possède :
 
 La relation est de type 1:1.
 
-L'Audit Service est le seul composant autorisé à créer, mettre à jour ou supprimer ces artefacts.
+L'Audit Service est le seul composant autorisé à créer les artefacts d'audit.
 
-Les applications consommatrices ne peuvent jamais accéder directement au stockage.
+Les événements d'audit ne peuvent pas être modifiés après leur création.
+
+Les opérations de rétention, d'archivage ou de suppression doivent également être orchestrées par l'Audit Service.
 
 Cette approche permet :
 
@@ -131,6 +139,71 @@ Exemple :
 
 AuditEventId = 3e2d6c6a-45f0-4d7e-b4d3-91a58f1d2e4c
 
+## Risque critique : Désynchronisation Index / Blob
+
+Le principal risque de cette architecture est la perte de cohérence entre :
+
+- L'enregistrement de l'index SQL
+- L'événement complet stocké dans Azure Blob Storage
+
+Exemples d'incohérence :
+
+### Cas 1
+
+L'index SQL existe mais le Blob est manquant.
+
+Conséquence :
+
+- Les recherches fonctionnent
+- Les détails complets de l'événement deviennent inaccessibles
+
+### Cas 2
+
+Le Blob existe mais l'index SQL est manquant.
+
+Conséquence :
+
+- L'événement existe toujours
+- Les rapports et recherches opérationnelles ne peuvent plus le retrouver
+
+### Cas 3
+
+Le Blob et l'index pointent vers des versions différentes.
+
+Conséquence :
+
+- Résultats incohérents
+- Risque d'erreur lors d'un audit ou d'une enquête
+
+### Mesures d'atténuation
+
+Afin de réduire ce risque :
+
+- Seul l'Audit Service peut écrire dans SQL ou dans Azure Blob Storage
+- Les applications ne peuvent jamais accéder directement aux mécanismes de stockage
+- La création de l'index et du Blob doit être réalisée comme une opération unique contrôlée par l'Audit Service
+- Des vérifications périodiques d'intégrité peuvent être exécutées afin de détecter les incohérences
+- AuditEventId demeure la référence unique entre les deux systèmes
+
+### Hypothèse clé
+
+Cette stratégie demeure viable tant que l'Audit Service reste l'unique propriétaire du cycle de vie des événements d'audit.
+
+Aucune application ne doit accéder directement :
+
+- À l'index SQL
+- Aux blobs d'archivage
+
+Toutes les opérations doivent transiter par l'Audit Service afin de garantir la cohérence des données.
+
+### Importance du risque
+
+Cette désynchronisation représente le principal risque architectural de la stratégie de stockage proposée.
+
+Sans mécanismes de contrôle adéquats, il devient impossible de garantir qu'un événement retrouvé via l'index SQL possède toujours son équivalent complet dans Azure Blob Storage.
+
+La cohérence entre les deux systèmes doit être considérée comme une exigence critique de la plateforme d'audit.
+
 ## Question : Que faire de l'index lorsqu'un blob pass Cool ou Archive ?
 ### Option A Conserver l'index SQL indéfiniment
 #### Avantage
@@ -144,17 +217,47 @@ Coût minimal.
 #### Inconvénient
 Les rapports historiques deviennent très difficiles.
 
-### Option C - Index SQL avec rétention propre
-| Données   | Conservation |
-| --------- | ------------ |
-| Blob      | 7 ans        |
-| SQL Index | 2 ans        |
+### Option C - Index SQL avec rétention propre (Recommandée)
+
+| Données | Conservation |
+|----------|----------|
+| Blob | 7 ans |
+| SQL Index | 2 ans |
 
 Après 2 ans :
-SQL purge
-Blob conservé
-Fabric conserve la capacité analytique
 
+- Index SQL supprimé
+- Blob conservé
+- Fabric conserve la capacité analytique
+
+#### Avantages
+
+- Contrôle de la croissance du stockage SQL
+- Coût d'exploitation prévisible
+- Rapports opérationnels rapides sur les données récentes
+- Conservation long terme des événements complets
+- Compatible avec Microsoft Fabric
+- Réduction de la maintenance SQL à long terme
+
+#### Inconvénients
+
+- Les recherches opérationnelles ne couvrent que la période conservée dans l'index SQL
+- Les analyses historiques nécessitent Azure Blob Storage ou Microsoft Fabric
+- Processus d'archivage et de purge plus complexes
+- Nécessite une gouvernance claire de la rétention
+
+## Décision recommandée
+
+La stratégie recommandée pour DigiWeb Audit Trail est l'Option C.
+
+Justification :
+
+- Contrôle des coûts de stockage SQL
+- Conservation long terme des événements
+- Compatibilité avec Microsoft Fabric
+- Bon équilibre entre performance et coût
+- Réduction de la croissance des données opérationnelles
+  
 ---
 
 # Consultation des rapports
