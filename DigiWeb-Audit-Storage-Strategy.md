@@ -59,6 +59,8 @@ Il est donc souhaitable d'utiliser une approche mieux adaptée aux données d'au
 
 L'architecture proposée repose sur deux mécanismes complémentaires :
 
+---
+
 ### 1. Stockage principal des événements
 
 Tous les événements d'audit sont conservés dans Azure Blob Storage.
@@ -203,6 +205,8 @@ Cette désynchronisation représente le principal risque architectural de la str
 Sans mécanismes de contrôle adéquats, il devient impossible de garantir qu'un événement retrouvé via l'index SQL possède toujours son équivalent complet dans Azure Blob Storage.
 
 La cohérence entre les deux systèmes doit être considérée comme une exigence critique de la plateforme d'audit.
+
+---
 
 ## Question : Que faire de l'index lorsqu'un blob pass Cool ou Archive ?
 ### Option A Conserver l'index SQL indéfiniment
