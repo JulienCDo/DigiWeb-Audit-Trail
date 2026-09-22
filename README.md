@@ -41,8 +41,6 @@
 ### Architecture et gouvernance
 
 - DigiWeb-Audit-Trail-Architecture.md
-- DigiWeb-Audit-Retention-Policy.md
-- DigiWeb-Audit-Technical-Risks.md
 
 ---
 
