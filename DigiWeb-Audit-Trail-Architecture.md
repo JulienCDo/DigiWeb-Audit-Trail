@@ -151,7 +151,7 @@ Exemples :
 
 ## Storage 
 Voir:
-[À valider](./DigiWeb-Audit_storage-Strategy.md)
+[À valider](./DigiWeb-Audit-Storage-Strategy.md)
 
 Principe actuel :
 
