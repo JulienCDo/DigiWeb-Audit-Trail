@@ -33,32 +33,51 @@ L'audit ne doit pas ralentir significativement les opérations DigiWeb.
 
 Le système doit supporter de nouveaux événements sans modification majeure.
 
+## Architecture cible
+
+```text
+Applications
+
+ ├── DigiWeb
+ ├── DigiConsole
+ └── Future Applications
+
+            │
+
+            ▼
+
+         Audit API
+
+            ▼
+
+        Audit Service
+
+            ▼
+
+      Audit Repository
+
+            ├── SQL Index
+            └── Blob Storage
+
+                    ▼
+
+            Reporting Layer
+
+                    ▼
+
+            Microsoft Fabric
 ```
-DigiWeb
-    │
-    │ Emit Audit Event
-    ▼
-Audit Service
-    │
-    ▼
-Audit Repository
-    │
-    ▼
-AuditEvent Table
-    │
-    ├── Reports
-    ├── Audit Search
-    └── Future Fabric Export
-```
 
-## Audit Service
+## Audit Platform
 
-Responsable de :
+La plateforme d'audit centralisée est composée des éléments suivants :
 
-- Recevoir les événements
-- Valider les données
-- Enrichir les métadonnées
-- Persister les événements
+- Audit API
+- Audit Service
+- Audit Repository
+- Audit Index
+- Audit Archive
+- Reporting Layer
 
 ### Interface
 ```
@@ -74,16 +93,33 @@ await auditService.LogAsync(
     AuditEventFactory.DictationViewed(...)
 );
 ```
+## Audit API
+
+Point d'entrée unique permettant aux applications de publier des événements d'audit.
+
+Applications supportées :
+
+- DigiWeb
+- DigiConsole
+- Applications futures
+
+Responsabilités :
+
+- Authentifier les applications consommatrices
+- Recevoir les événements d'audit
+- Valider le format des événements
+- Transmettre les événements à l'Audit Service
+
 
 ## Audit Repository
 
-Responsable du stockage des événements.
+Responsable de la persistance des événements d'audit.
 
 Fonctions :
 
 - Insert
+- GetById
 - Search
-- Reporting
 
 ### Interface
 ```
@@ -94,3 +130,61 @@ IAuditRepository
     Task<SearchResult<AuditEvent>> SearchAsync(...);
 }
 ```
+
+## Reporting Layer
+
+Responsable de :
+
+- Générer les rapports d'audit
+- Exécuter les recherches
+- Fournir les données aux interfaces utilisateur
+- Préparer les futures intégrations analytiques
+
+Exemples :
+
+- Access Audit Report
+- Security Audit Report
+- Audio Access Audit Report
+- Time Analysis Report
+- True Productivity Report
+
+
+## Storage 
+Voir:
+[À valider](./DigiWeb-Audit_storage-Strategy.md)
+
+Principe actuel :
+
+- Azure Blob Storage comme source officielle de conservation
+- Index SQL léger pour les recherches opérationnelles
+- Préparation pour Microsoft Fabric
+
+## Sécurité
+
+Principes :
+
+- Les événements d'audit sont immuables
+- Les événements ne peuvent pas être modifiés par les utilisateurs
+- Seuls les rôles autorisés peuvent consulter les rapports
+- Toutes les communications entre applications et Audit API doivent être authentifiées
+
+## Vision long terme
+
+Le système d'audit doit être conçu comme une plateforme centralisée pouvant être utilisée par plusieurs applications.
+
+Applications ciblées :
+
+- DigiWeb
+- DigiConsole
+- Applications futures
+
+Chaque application publie des événements conformes au modèle AuditEvent.
+
+L'Audit Platform assure :
+
+- La réception des événements
+- La validation
+- L'archivage
+- L'indexation
+- L'exposition aux rapports
+- L'alimentation future de Microsoft Fabric
