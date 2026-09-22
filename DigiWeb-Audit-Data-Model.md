@@ -18,17 +18,17 @@ Fournir un modèle unique permettant de stocker tous les événements d'audit de
 | EventType 		| String 	| Type d'événement 					| [Type d'évènement](#type-dévènement)
 | Category 			| String 	| Domaine fonctionnel 				| [Catégories](#catégories-recommandées)
 | EntityType 		| String 	| Type d'objet 						| [Type d'entité](#types-dentités)
+| EntityId 			| String 	| Identifiant d'objet 				|
 | UserId 			| Guid 		| Utilisateur concerné 				| 
 | UserName 			| String 	| Nom d'utilisateur 				|
 | UserRole 			| String 	| Rôle principal 					| [User Role](#user-role)
-| Application 		| String 	| Source de l'événement 			|
+| Application 		| String 	| Source de l'événement 			| DigiWeb, DigiConsole, etc...
 | Workstation 		| String 	| Poste de travail 					| Questionnable ...
 | IpAddress 		| String 	| Adresse IP 						| A-t-on le droit ?
-| EntityId 			| String 	| Identifiant métier 				|
 | TenantId 			| Guid 		| Organisation 						|
 | SessionId 		| Guid 		| Session utilisateur 				|
 | CorrelationId 	| Guid 		| Trace d'une transaction 			| Identifiant permettant de relier plusieurs événements appartenant à la même opération métier
-| CreatedBySystem 	| String 	| Module source 					|
+| CreatedBySystem 	| String 	| Module source 					| AuthenticationService, DictationService, TranscriptionService, ReportingService, etc...
 | Outcome 			| String 	| Succès ou échec 					| [Outcome](#outcome)
 | Severity 			| String 	| Niveau d'importance 				| [Severity](#severity)
 | Details 			| Json 		| Données additionnelles 			|
