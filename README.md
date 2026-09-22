@@ -40,7 +40,7 @@
 
 ### Architecture
 
-- DigiWeb-Audit-Trail-Architecture.md
+- [DigiWeb-Audit-Trail-Architecture](./DigiWeb-Audit-Trail-Architecture.md)
 
 ---
 
