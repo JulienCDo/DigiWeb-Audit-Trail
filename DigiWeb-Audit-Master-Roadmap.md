@@ -1,4 +1,6 @@
 # DigiWeb Audit Trail - Master Roadmap
+Version : 1.0  
+Dernière mise à jour : 2026-09-22
 
 ![Static Badge](https://img.shields.io/badge/Status-Analysis_Completed-green)
 ![Architecture](https://img.shields.io/badge/Architecture-In_progress-blue)
@@ -35,9 +37,6 @@ Mettre en place un système d'audit centralisé dans DigiWeb/Synnefo offrant :
 ---
 
 ## Documents de référence
-
-[Roadmap](./DigiWeb-Audit-Master-Roadmap.md)
-
 ### Analyse fonctionnelle
 
 - [DigiWeb-Audit-Trail-and-Reporting-Requirements](./DigiWeb-Audit-Trail-and-Reporting-Requirements.md)
