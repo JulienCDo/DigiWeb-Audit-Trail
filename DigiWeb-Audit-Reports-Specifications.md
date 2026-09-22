@@ -254,11 +254,11 @@ Historique des événements liés à la sécurité du système.
 
 ---
 
-# File Access Audit Report
+# Audio Access Audit Report
 
 ## Description
 
-Historique des accès et manipulations des fichiers audio.
+Historique des accès et manipulations des enregistrements audio.
 
 ## Événements utilisés
 
@@ -285,11 +285,11 @@ Historique des accès et manipulations des fichiers audio.
 
 ## Exemple
 
-| Date/Heure | Fichier | Utilisateur | Action |
-|------------|------------|------------|------------|
-| 09:00 | Audio-100.mp3 | Jane Doe | Downloaded |
-| 09:10 | Audio-100.mp3 | Jane Doe | Playback |
-| 09:20 | Audio-100.mp3 | Administrator | Purged |
+| Date/Heure | DictationId| AudioId | Utilisateur | Action |
+|------------|------------|---------|-------------|--------|
+| 09:00 | D-100345 | A-2001 | Jane Doe | Downloaded |
+| 09:10 | D-100345 | A-2001 | Jane Doe | Playback |
+| 09:20 | D-100345 | A-2001 | Administrator | Purged |
 
 ## Export
 
