@@ -36,20 +36,6 @@ Mettre en place un système d'audit centralisé dans DigiWeb/Synnefo offrant :
 
 ---
 
-## Documents de référence
-### Analyse fonctionnelle
-
-- [DigiWeb-Audit-Trail-and-Reporting-Requirements](./DigiWeb-Audit-Trail-and-Reporting-Requirements.md)
-- [DigiWeb-Audit-Data-Model](./DigiWeb-Audit-Data-Model.md)
-- [DigiWeb-Audit-Event-Catalog](./DigiWeb-Audit-Event-Catalog.md)
-- [DigiWeb-Audit-Coverage-Matrix](./DigiWeb-Audit-Coverage-Matrix.md)
-- [DigiWeb-Audit-Prioritization](./DigiWeb-Audit-Prioritization.md)
-- [DigiWeb-Audit-Reports-Specifications](./DigiWeb-Audit-Reports-Specifications.md)
-
-### Architecture
-
-- [DigiWeb-Audit-Trail-Architecture](./DigiWeb-Audit-Trail-Architecture.md)
-
 ### Gouvernance
 
 À définir
