@@ -87,16 +87,73 @@ L'index ne contient pas l'événement complet.
 
 # Architecture logique
 
-```text
-DigiWeb
-    │
-    ▼
+```
 Audit Service
     │
     ├── Audit Index (SQL)
+    │       │
+    │       └── AuditEventId
     │
-    └── Audit Archive (Azure Blob Storage)
+    └── Audit Archive (Blob)
+            │
+            └── AuditEventId
 ```
+
+## Cohérence des données
+
+Chaque événement d'audit possède :
+
+- Un enregistrement complet dans Azure Blob Storage
+- Un enregistrement correspondant dans l'index SQL
+
+La relation est de type 1:1.
+
+L'Audit Service est le seul composant autorisé à créer, mettre à jour ou supprimer ces artefacts.
+
+Les applications consommatrices ne peuvent jamais accéder directement au stockage.
+
+Cette approche permet :
+
+- De préserver l'intégrité des données
+- D'éviter les incohérences entre l'index et les événements archivés
+- De centraliser la logique de rétention et d'archivage
+
+## Identifiant unique
+
+Chaque événement reçoit un AuditEventId unique.
+
+Cet identifiant est utilisé comme clé de référence entre :
+
+- L'enregistrement SQL
+- L'événement complet stocké dans Azure Blob Storage
+
+Exemple :
+
+AuditEventId = 3e2d6c6a-45f0-4d7e-b4d3-91a58f1d2e4c
+
+## Question : Que faire de l'index lorsqu'un blob pass Cool ou Archive ?
+### Option A Conserver l'index SQL indéfiniment
+#### Avantage
+Rapport rapides.
+#### Inconvénient
+Le SQL ne fait que grossir. Les coûts et la lourdeur des requêtes aussi.
+
+### Option B - Supprimer l'index en même temps que l'archivage
+#### Avantage
+Coût minimal.
+#### Inconvénient
+Les rapports historiques deviennent très difficiles.
+
+### Option C - Index SQL avec rétention propre
+| Données   | Conservation |
+| --------- | ------------ |
+| Blob      | 7 ans        |
+| SQL Index | 2 ans        |
+
+Après 2 ans :
+SQL purge
+Blob conservé
+Fabric conserve la capacité analytique
 
 ---
 
