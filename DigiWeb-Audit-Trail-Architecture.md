@@ -188,3 +188,9 @@ L'Audit Platform assure :
 - L'indexation
 - L'exposition aux rapports
 - L'alimentation future de Microsoft Fabric
+
+Microsoft Fabric n'est pas requis pour la phase 1.
+
+La plateforme d'audit doit toutefois être conçue de manière à permettre une future exploitation des événements d'audit stockés dans Azure Blob Storage.
+
+Azure Blob Storage constitue ainsi la source officielle des événements et la future source de données analytiques utilisée par Microsoft Fabric.
