@@ -50,7 +50,7 @@ Mettre en place un système d'audit centralisé dans DigiWeb/Synnefo offrant :
 ## Étape 1 - Définir le modèle d'audit central
 
 Livrable :
-- DigiWeb-Audit-Data-Model.md
+- [DigiWeb-Audit-Data-Model](./DigiWeb-Audit-Data-Model.md)
 
 Statut :
 ✅ Terminé
@@ -60,7 +60,7 @@ Statut :
 ## Étape 2 - Construire le catalogue des événements d'audit
 
 Livrable :
-- DigiWeb-Audit-Event-Catalog.md
+- [DigiWeb-Audit-Event-Catalog](./DigiWeb-Audit-Event-Catalog.md)
 
 Statut :
 ✅ Terminé
@@ -70,7 +70,7 @@ Statut :
 ## Étape 3 - Cartographier les fonctionnalités existantes
 
 Livrable :
-- DigiWeb-Audit-Coverage-Matrix.md
+- [DigiWeb-Audit-Coverage-Matrix](./DigiWeb-Audit-Coverage-Matrix.md)
 
 Statut :
 ✅ Terminé
@@ -80,7 +80,7 @@ Statut :
 ## Étape 4 - Prioriser les exigences
 
 Livrable :
-- DigiWeb-Audit-Prioritization.md
+- [DigiWeb-Audit-Prioritization](./DigiWeb-Audit-Prioritization.md)
 
 Statut :
 ✅ Terminé
@@ -92,7 +92,7 @@ Statut :
 ## Étape 5 - Spécifier les rapports
 
 Livrable :
-- DigiWeb-Audit-Reports-Specifications.md
+- [DigiWeb-Audit-Reports-Specifications](./DigiWeb-Audit-Reports-Specifications.md)
 
 Statut :
 ✅ Terminé
@@ -104,7 +104,7 @@ Statut :
 ## Étape 6 - Concevoir l'architecture d'audit
 
 Livrable :
-- DigiWeb-Audit-Trail-Architecture.md
+- [DigiWeb-Audit-Trail-Architecture](./DigiWeb-Audit-Trail-Architecture.md)
 
 Statut :
 🔄 En cours
