@@ -159,14 +159,36 @@ Principe actuel :
 - Index SQL léger pour les recherches opérationnelles
 - Préparation pour Microsoft Fabric
 
-## Sécurité
+## Security Model
 
-Principes :
+### Publication
 
-- Les événements d'audit sont immuables
-- Les événements ne peuvent pas être modifiés par les utilisateurs
-- Seuls les rôles autorisés peuvent consulter les rapports
-- Toutes les communications entre applications et Audit API doivent être authentifiées
+Seules les applications approuvées peuvent publier des événements.
+
+Applications autorisées :
+
+- DigiWeb
+- DigiConsole
+- Applications futures
+
+L'authentification s'effectue au niveau applicatif.
+
+### Consultation
+
+Rôles autorisés :
+
+- Administrator
+- Supervisor
+
+### Modification
+
+Les événements d'audit sont immuables.
+
+Aucune modification manuelle n'est autorisée.
+
+### Suppression
+
+Seules les politiques de rétention approuvées peuvent supprimer des événements.
 
 ## Audit Event Processing Flow
 
@@ -407,6 +429,32 @@ Les indicateurs suivants doivent être surveillés :
 - Taille de la file d'attente
 
 Des alertes doivent être générées lorsqu'une incohérence est détectée.
+
+## Recovery Strategy
+
+Azure Blob Storage constitue la source officielle des événements.
+
+En cas de perte ou corruption de l'index SQL, celui-ci peut être reconstruit à partir des événements archivés.
+
+Cette approche réduit la dépendance à l'index SQL et améliore la résilience de la plateforme.
+
+## Non Functional Requirements
+
+### Scalability
+
+La plateforme doit supporter l'ajout de nouvelles applications sans modification majeure de l'architecture.
+
+### Availability
+
+L'indisponibilité temporaire de la plateforme d'audit ne doit pas empêcher les opérations métier.
+
+### Maintainability
+
+Toutes les applications utilisent le modèle AuditEvent standard.
+
+### Performance
+
+La publication d'un événement d'audit ne doit pas avoir d'impact perceptible sur l'expérience utilisateur.
 
 ## Vision long terme
 
