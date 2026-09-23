@@ -40,32 +40,32 @@ Applications
 
  ├── DigiWeb
  ├── DigiConsole
- └── Future Applications
+ └── Future Apps
 
-            │
+          │
 
-            ▼
+          ▼
 
-         Audit API
+     Audit gRPC API
 
-            ▼
+          ▼
 
-        Audit Service
+      Audit Service
 
-            ▼
+          ▼
 
-      Audit Repository
+    Internal Queue
 
-            ├── SQL Index
-            └── Blob Storage
+          ▼
 
-                    ▼
+     Storage Layer
 
-            Reporting Layer
+       ├── SQL Index
+       └── Blob Storage
 
-                    ▼
+                ▼
 
-            Microsoft Fabric
+          Microsoft Fabric
 ```
 
 ## Audit Platform
@@ -93,9 +93,9 @@ await auditService.LogAsync(
     AuditEventFactory.DictationViewed(...)
 );
 ```
-## Audit API
+## Audit gRPC API
 
-Point d'entrée unique permettant aux applications de publier des événements d'audit.
+La plateforme d'audit expose un service gRPC utilisé par les applications consommatrices.
 
 Applications supportées :
 
@@ -105,11 +105,11 @@ Applications supportées :
 
 Responsabilités :
 
-- Authentifier les applications consommatrices
-- Recevoir les événements d'audit
-- Valider le format des événements
-- Transmettre les événements à l'Audit Service
+- Authentifier les applications
+- Valider les événements reçus
+- Transmettre les événements au pipeline de traitement
 
+L'utilisation de gRPC assure une cohérence avec l'architecture actuelle des services backend DigiWeb.
 
 ## Audit Repository
 
