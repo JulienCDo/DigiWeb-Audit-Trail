@@ -264,4 +264,83 @@ The Version 1 solution must be fully operational using Azure Cosmos DB as the so
 - LOGIN
 - LOGOUT
 - DICTATION_ACCESSED
-- DICTATION_
+- DICTATION_STATUS_CHANGED
+- DICTATION_PURGED
+- TRANSCRIPTION_MODIFIED
+- TRANSCRIPTION_STATUS_CHANGED
+- WORK_SESSION
+- REPORT_EXECUTED
+
+---
+
+### Reports
+
+- Access Audit Report
+- Detailed Transcription Report
+- Dictation Status History Report
+- User Activity Audit Report
+- Time Analysis Report
+- True Productivity Report
+
+---
+
+# Out of Scope for MVP
+
+## Events
+
+- USER_CREATED
+- USER_DISABLED
+- ROLE_CHANGED
+- PERMISSION_CHANGED
+- AUDIO_ACCESSED
+- AUDIO_DOWNLOADED
+- REPORT_EXPORTED
+- AI-related events
+
+---
+
+## Platform Capabilities
+
+- Microsoft Fabric
+- Advanced Analytics
+- AI Usage Analytics
+- Cross-Application Reporting
+- Long-Term Historical Analytics
+
+---
+
+# Delivery Priorities
+
+## Phase 1 - Foundation
+
+### Platform
+
+- Audit gRPC API
+- Audit Service
+- Azure Cosmos DB
+- Multi-tenant support
+
+### Reports
+
+1. Access Audit Report
+
+### Events
+
+- LOGIN
+- LOGOUT
+- DICTATION_ACCESSED
+
+---
+
+## Phase 2 - Operational Auditing
+
+### Reports
+
+2. Detailed Transcription Report
+3. Dictation Status History Report
+
+### Events
+
+- TRANSCRIPTION_MODIFIED
+- TRANSCRIPTION_STATUS_CHANGED
+- DICTATION_STATUS_CHANGED
