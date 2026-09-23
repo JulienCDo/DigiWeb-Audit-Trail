@@ -1,132 +1,176 @@
-# DigiWeb Audit Data Model
+# DigiWeb Audit Platform
+# Audit Data Model
 
-## Objectif
-
-Fournir un modèle unique permettant de stocker tous les événements d'audit de la plateforme DigiWeb/Synnefo.
-
----
-
-# AuditEvent
-
-## Champs communs
-
-| Champ 			| Type 		| Description 						| Precision
-|---				|:---:		|---								|---
-| AuditEventId 		| Guid 		| Identifiant unique 				| Généré au moment de la création de l'audit
-| EventVersion 		| Int 		| Version du contrat d'événement 	|
-| TimestampUtc 		| DateTime 	| Date de l'événement 				| TimeStamp à la seconde près
-| EventType 		| String 	| Type d'événement 					| [Type d'évènement](#type-dévènement)
-| Category 			| String 	| Domaine fonctionnel 				| [Catégories](#catégories-recommandées)
-| EntityType 		| String 	| Type d'objet 						| [Type d'entité](#types-dentités)
-| EntityId 			| String 	| Identifiant d'objet 				|
-| UserId 			| Guid 		| Utilisateur concerné 				| 
-| UserName 			| String 	| Nom d'utilisateur 				|
-| UserRole 			| String 	| Rôle principal 					| [User Role](#user-role)
-| Application 		| String 	| Source de l'événement 			| DigiWeb, DigiConsole, etc...
-| Workstation 		| String 	| Poste de travail 					| Questionnable ...
-| IpAddress 		| String 	| Adresse IP 						| A-t-on le droit ?
-| TenantId 			| Guid 		| Organisation 						|
-| SessionId 		| Guid 		| Session utilisateur 				|
-| CorrelationId 	| Guid 		| Trace d'une transaction 			| Identifiant permettant de relier plusieurs événements appartenant à la même opération métier
-| CreatedBySystem 	| String 	| Module source 					| AuthenticationService, DictationService, TranscriptionService, ReportingService, etc...
-| Outcome 			| String 	| Succès ou échec 					| [Outcome](#outcome)
-| Severity 			| String 	| Niveau d'importance 				| [Severity](#severity)
-| Details 			| Json 		| Données additionnelles 			|
+Version: 1.0
+Status: Approved
+Phase: Architecture
 
 ---
 
-# Catégories recommandées
-- Authentication
-- Dictation
-- Transcription
-- Audio
+# 1. Purpose
+
+This document defines the canonical audit event data model for the DigiWeb Audit Platform.
+
+The objective of the model is to:
+
+- Support all current customer audit and reporting requirements.
+- Minimize storage costs.
+- Reduce event payload size.
+- Simplify reporting and querying.
+- Support multi-tenant environments.
+- Enable future reuse by DigiConsole and other applications.
+- Provide a stable foundation for future analytics integration.
+
+The platform uses Azure Cosmos DB as the audit event datastore and source of truth.
+
+---
+
+# 2. Design Principles
+
+The audit model follows the following principles:
+
+## Principle 1 - Store Only What Is Needed
+
+Audit events should only contain information required to:
+
+- Produce audit reports
+- Support security investigations
+- Meet compliance requirements
+
+Fields without a clear reporting or audit use case must not be stored.
+
+---
+
+## Principle 2 - Minimize Event Volume
+
+Only meaningful business and security events are audited.
+
+Technical events such as:
+
+- Button clicks
+- Window navigation
+- Screen focus changes
+- UI interactions
+
+are not recorded.
+
+---
+
+## Principle 3 - Immutable Events
+
+Audit events are immutable.
+
+Once written to Cosmos DB:
+
+- Events cannot be modified.
+- Events cannot be deleted individually.
+
+---
+
+## Principle 4 - Multi-Tenant by Design
+
+Every audit event belongs to a tenant.
+
+Tenant isolation must be enforced for:
+
+- Storage
+- Querying
 - Reporting
-- Administration
 - Security
-- AI
-- System
-- ...
 
 ---
 
-# Types d'entités
-- User
-- Dictation
-- Transcription
-- AudioFile
-- Report
-- Role
-- Permission
-- ...
+## Principle 5 - Application Agnostic
+
+The model must support:
+
+- DigiWeb
+- DigiConsole
+- Future applications
+
+without requiring schema changes.
 
 ---
 
-# Type d'évènement
-- LoginSucceeded
-- LoginFailed
-- DictationOpened
-- DictationViewed
-- TranscriptionApproved
-- ReportExecuted
-- AudioPurged
-- ...
+# 3. Audit Event Structure
 
----
-
-# User Role
-- Transcriptionist
-- Reviewer
-- Author
-- Physician
-- Supervisor
-- Administrator
-- Support
-- System
-- ...
-
----
-
-# Outcome
-- Success
-- Failed
-- PartialSuccess
-- Denied
-
----
-
-# Severity
-- Info
-- Warning
-- Error
-- Critical
-
----
-
-# Exemple
-
-## Login réussi
+## Canonical Audit Event
 
 ```json
 {
-  "eventType": "LoginSucceeded",
-  "category": "Authentication",
-  "userId": "123",
-  "userName": "jsmith",
-  "timestampUtc": "2026-09-21T18:00:00Z",
-  "ipAddress": "10.10.10.10"
+  "id": "8e3a7d7c-9d67-4dc9-a337-cf1d4e44dc5",
+
+  "ts": "2026-09-23T15:30:22Z",
+
+  "tenantId": "TENANT001",
+
+  "app": "DigiWeb",
+
+  "event": "DICTATION_ACCESSED",
+
+  "userId": "USR123",
+
+  "targetId": "DICT456",
+
+  "data": {}
 }
 ```
 
-## Changement de status
-```json
+# 4. Field Definitions
+|Field|Required|Description|
+|----|----|----|
+|id|Yes|Unique audit event identifier|
+|ts|Yes|UTC timestamp|
+|tenantId|Yes|Tenant identifier|
+|app|Yes|Source application|
+|event|Yes|Audit event type|
+|userId|Yes|User responsible for the action|
+|targetId|No|Business object impacted by the action|
+|data|No|Event-specific metadata|
+
+---
+
+# 5. Field Details
+## id
+Globally unique identifier.  
+``
+Exemple: 8e3a7d7c-9d67-4dc9-a337-cf1d4e44dc5  
+``
+## ts
+UTC timestamp representing when the audited action occurred.  
+``
+Exemple:  
+2026-09-23T15:30:22Z  
+``
+## tenantId
+Tenant that owns the event.
+## app
+Application that generated the event.  
+``
+Exemple:  
+DigiWeb  
+DigiConsole
+``
+## event
+Business audit event identifier.  
+``
+Exemple:  
+LOGIN  
+DICTATION_ACCESSED  
+REPORT_EXECUTED  
+``
+## userId
+Unique identifier of the user performing the action.  
+
+## targetId
+Identifier of the primary business object affected by the event.  
+## data
+Optional event-specific information.  
+Present only when additional information is required.  
+``
+Exemple:
 {
-  "eventType": "DictationStatusChanged",
-  "category": "Dictation",
-  "entityType": "Dictation",
-  "entityId": "D-100345",
-  "details": {
-    "oldStatus": "Reserved",
-    "newStatus": "Completed"
-  }
+  "from": "Draft",
+  "to": "Completed"
 }
-```
+``
