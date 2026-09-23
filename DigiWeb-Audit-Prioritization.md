@@ -1,185 +1,211 @@
 # DigiWeb Audit Prioritization
 
-## Objectif
+## Purpose
 
-Définir les priorités d'implémentation du système d'audit DigiWeb.
+Define the implementation priorities for the DigiWeb Audit Platform.
 
-Cette priorisation vise à :
+This prioritization aims to:
 
-- Répondre aux exigences réglementaires et contractuelles
-- Livrer rapidement de la valeur métier
-- Réduire les risques projet
-- Fournir une base solide pour les évolutions futures
+- Satisfy customer audit requirements
+- Deliver business value early
+- Reduce implementation risk
+- Establish a reusable audit platform for DigiWeb, DigiConsole, and future applications
+- Maintain a minimal and sustainable audit footprint
 
 ---
 
-# Must Have (v1)
+# Must Have (Version 1)
 
 ## Description
 
-Fonctionnalités requises pour la conformité, la traçabilité et les audits clients.
+These capabilities are required to satisfy the audit and reporting requirements explicitly identified by the customer.
 
-L'absence d'un de ces éléments compromettrait les objectifs du projet.
+Without these items, the audit platform cannot meet the project's primary objectives.
 
 ---
 
-## Authentication
+## Authentication Audit
 
-### Événements
+### Events
 
-- LoginSucceeded
-- LoginFailed
-- Logout
-- SessionExpired
+- LOGIN
+- LOGOUT
 
 ### Justification
 
-Traçabilité des accès à la plateforme.
+Provides traceability of user access to the platform.
+
+Supports:
+
+- User Activity Audit
 
 ---
 
 ## Dictation Access Audit
 
-### Événements
+### Events
 
-- DictationOpened
-- DictationViewed
+- DICTATION_ACCESSED
 
 ### Justification
 
-Répond directement au besoin :
+Directly answers the customer requirement:
 
-> Qui a consulté cette dictée ?
+> Who accessed a dictation?
+
+Supports:
+
+- Access Audit Report
 
 ---
 
 ## Dictation Status History
 
-### Événements
+### Events
 
-- DictationStatusChanged
+- DICTATION_STATUS_CHANGED
 
 ### Justification
 
-Historique complet des transitions.
+Provides a complete history of dictation workflow transitions.
+
+Supports:
+
+- Dictation Status History Report
+- User Activity Audit
 
 ---
 
 ## Transcription Audit
 
-### Événements
+### Events
 
-- TranscriptionCreated
-- TranscriptionModified
-- TranscriptionReviewed
-- TranscriptionApproved
-- TranscriptionSigned
-- TranscriptionRejected
-- TranscriptionReturned
+- TRANSCRIPTION_MODIFIED
+- TRANSCRIPTION_STATUS_CHANGED
 
 ### Justification
 
-Traçabilité complète des interventions sur une transcription.
+Provides traceability of user activity on transcriptions.
+
+Supports:
+
+- Detailed Transcription Report
+- User Activity Audit
+
+Directly answers:
+
+> Who modified a transcription?
 
 ---
 
-## Advanced Productivity
+## Productivity Tracking
 
-### Événements
+### Events
 
-- TranscriptionTimeTracked
-- ProductivityCalculated
+- WORK_SESSION
 
 ### Justification
 
-KPI de performance.
+Captures effective transcription work duration.
+
+Supports:
+
+- Time Analysis Report
+- True Productivity Report
+
+Directly answers:
+
+> How much time was spent transcribing?
 
 ---
-## Security & Permissions
 
-### Événements
+## Dictation Retention Audit
 
-- RoleAssigned
-- RoleRemoved
-- PermissionChanged
+### Events
+
+- DICTATION_PURGED
 
 ### Justification
 
-Audit des droits d'accès.
+Tracks permanent deletion of dictation recordings.
+
+Supports:
+
+- User Activity Audit
+- Compliance investigations
 
 ---
 
-## Audio Retention
+## Report Usage Audit
 
-### Événements
+### Events
 
-- AudioPurged
+- REPORT_EXECUTED
 
 ### Justification
 
-Audit des suppressions permanentes.
+Tracks report usage within the system.
+
+Supports:
+
+- User Activity Audit
+- Report Usage Reporting
+
+Directly answers:
+
+> Who executed a report?
 
 ---
 
-# Should Have (v1.1)
+# Should Have (Version 1.1)
 
 ## Description
 
-Fonctionnalités à forte valeur ajoutée mais non bloquantes pour la conformité.
+Additional audit capabilities that may provide operational value but are not required to satisfy current customer requirements.
 
 ---
 
-## Audio Activity
+## Security Administration Audit
 
-### Événements
+### Potential Events
 
-- PlaybackStarted
-- PlaybackPaused
-- PlaybackStopped
+- USER_CREATED
+- USER_DISABLED
+- ROLE_CHANGED
+- PERMISSION_CHANGED
 
 ### Justification
 
-Analyse comportementale et opérationnelle.
+Provides traceability of administrative security actions.
+
+Not currently required by customer audit reports.
 
 ---
 
-## Report Audit
+## Audio Access Audit
 
-### Événements
+### Potential Events
 
-- ReportExecuted
-- ReportExported
+- AUDIO_ACCESSED
+- AUDIO_DOWNLOADED
 
 ### Justification
 
-Traçabilité de l'utilisation des rapports.
+Provides visibility into access to audio recordings.
+
+May become relevant for future compliance or privacy requirements.
 
 ---
 
-## Lock Management
+## Report Export Audit
 
-### Événements
+### Potential Events
 
-- LockAcquired
-- LockReleased
-- LockDenied
+- REPORT_EXPORTED
 
 ### Justification
 
-Diagnostic et analyse des conflits utilisateurs.
-
----
-
-## Audio Access
-
-### Événements
-
-- AudioDownloaded
-- AudioDeleted
-
-### Justification
-
-Meilleur contrôle des accès aux fichiers.
+Tracks data extraction activities and report distribution.
 
 ---
 
@@ -187,21 +213,21 @@ Meilleur contrôle des accès aux fichiers.
 
 ## Description
 
-Fonctionnalités pouvant être ajoutées après la mise en production du système d'audit principal.
+Capabilities intended for future enhancement once production usage patterns and audit volumes are better understood.
 
 ---
 
-## Artificial Intelligence
+## Artificial Intelligence Audit
 
-### Événements
+### Potential Events
 
-- AIAssistanceRequested
-- AIAssistanceCompleted
-- AIAssistanceFailed
+- AI_ASSISTANCE_REQUESTED
+- AI_ASSISTANCE_COMPLETED
+- AI_ASSISTANCE_FAILED
 
 ### Justification
 
-Statistiques d'utilisation IA.
+Provides analytics and governance for AI-assisted workflows.
 
 ---
 
@@ -211,71 +237,31 @@ Statistiques d'utilisation IA.
 
 Microsoft Fabric
 
-### Cas d'utilisation
+### Potential Use Cases
 
-- Power BI
-- KPI opérationnels
-- Analyse historique
-- Tendances
-- Détection d'anomalies
+- Historical trend analysis
+- Cross-application reporting
+- Operational KPIs
+- Productivity dashboards
+- Compliance dashboards
+- Anomaly detection
+- Long-term analytics
+
+### Notes
+
+Microsoft Fabric is not required for the initial audit platform release.
+
+The Version 1 solution must be fully operational using Azure Cosmos DB as the source of truth.
 
 ---
 
 # MVP Scope
 
-## Inclus dans la première version
+## Included in Version 1
 
-### Audit Trail
+### Audit Events
 
-- Authentication
-- Dictation Access
-- Dictation Status History
-- Transcription Audit
-- Permission Audit
-- Audio Purge Audit
-
-### Rapports
-
-- Access Audit
-- Detailed Transcription Audit
-- Status History Audit
-- Security Audit
-
----
-
-# Hors périmètre MVP
-
-- Microsoft Fabric
-- Productivité avancée
-- Analyse IA
-- Playback détaillé
-- Analytics avancés
-
----
-
-# Validation
-
-Cette priorisation est considérée valide lorsque :
-
-- [ ] Les besoins métier sont confirmés
-- [ ] Les besoins de conformité sont validés
-- [ ] Les rapports MVP sont approuvés
-- [ ] Le périmètre V1 est approuvé
-
----
-
-# Décision
-
-## MVP Audit DigiWeb
-
-La première livraison doit permettre de répondre aux questions suivantes :
-
-1. Qui s'est connecté ?
-2. Qui a consulté une dictée ?
-3. Qui a modifié une transcription ?
-4. Quelle est la durée de la transcription.
-4. Qui a changé un statut ?
-5. Qui a modifié des permissions ?
-6. Qui a supprimé un fichier audio ?
-
-Si ces six questions peuvent être répondues de manière fiable via les rapports d'audit, le MVP est considéré comme réussi.
+- LOGIN
+- LOGOUT
+- DICTATION_ACCESSED
+- DICTATION_
