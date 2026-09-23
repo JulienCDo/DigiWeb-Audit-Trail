@@ -168,6 +168,246 @@ Principes :
 - Seuls les rôles autorisés peuvent consulter les rapports
 - Toutes les communications entre applications et Audit API doivent être authentifiées
 
+## Audit Event Processing Flow
+
+### Objectif
+
+Définir le cycle de vie complet d'un événement d'audit depuis sa création par une application jusqu'à sa conservation finale.
+
+Cette architecture vise à :
+
+- Minimiser l'impact sur les applications consommatrices
+- Garantir la cohérence des données
+- Assurer la résilience du système
+- Préparer l'évolutivité future de la plateforme
+
+---
+
+### Flux logique
+
+```text
+Utilisateur
+      │
+      ▼
+Application
+(DigiWeb / DigiConsole)
+      │
+      ▼
+Audit gRPC API
+      │
+      ▼
+Audit Service
+      │
+      ▼
+Internal Queue
+      │
+      ▼
+Audit Processing Worker
+      │
+      ├── Azure Blob Storage
+      │
+      └── SQL Index
+```
+
+---
+
+### Étape 1 - Génération de l'événement
+
+Une action métier se produit dans une application.
+
+Exemples :
+
+- Connexion utilisateur
+- Consultation d'une dictée
+- Modification d'une transcription
+- Exécution d'un rapport
+- Purge d'un enregistrement audio
+
+L'application construit un objet AuditEvent conforme au modèle d'audit standard.
+
+Exemple :
+
+```json
+{
+  "eventType": "DictationViewed",
+  "category": "Dictation",
+  "userId": "123",
+  "entityType": "Dictation",
+  "entityId": "D-100345"
+}
+```
+
+---
+
+### Étape 2 - Publication via Audit gRPC API
+
+L'application transmet l'événement à la plateforme d'audit via l'API gRPC.
+
+Responsabilités :
+
+- Authentifier l'application émettrice
+- Recevoir l'événement
+- Valider le format minimal
+- Retourner rapidement une confirmation de réception
+
+L'appel doit être rapide et ne pas dépendre des mécanismes de stockage.
+
+---
+
+### Étape 3 - Validation et enrichissement
+
+L'Audit Service enrichit l'événement avec les métadonnées requises.
+
+Exemples :
+
+- AuditEventId
+- TimestampUtc
+- Application
+- CorrelationId
+- SessionId
+- CreatedBySystem
+
+L'événement devient alors prêt à être persisté.
+
+---
+
+### Étape 4 - Mise en file d'attente
+
+L'événement est placé dans une file interne de traitement.
+
+Objectifs :
+
+- Découpler les applications du stockage
+- Éviter qu'un ralentissement du stockage impacte les utilisateurs
+- Permettre les mécanismes de reprise et de réessai
+
+Une fois l'événement placé dans la file, l'application peut poursuivre son exécution normalement.
+
+---
+
+### Étape 5 - Traitement asynchrone
+
+Un ou plusieurs Audit Processing Workers récupèrent les événements depuis la file.
+
+Responsabilités :
+
+- Générer l'identifiant unique AuditEventId
+- Écrire l'événement complet dans Azure Blob Storage
+- Créer l'entrée correspondante dans l'index SQL
+- Vérifier la cohérence de la relation entre les deux mécanismes de stockage
+
+---
+
+### Étape 6 - Persistance
+
+Chaque événement produit deux artefacts :
+
+#### Événement complet
+
+Stocké dans Azure Blob Storage.
+
+Contient :
+
+- Toutes les données de l'événement
+- Les détails complets
+- Les métadonnées enrichies
+
+Azure Blob Storage constitue la source officielle de conservation.
+
+---
+
+#### Index opérationnel
+
+Stocké dans SQL.
+
+Contient uniquement les données nécessaires aux :
+
+- Recherches
+- Rapports
+- Filtres
+
+Exemples :
+
+- TimestampUtc
+- Category
+- EventType
+- UserId
+- EntityType
+- EntityId
+- Outcome
+- Severity
+- BlobPath
+
+---
+
+### Gestion des erreurs
+
+#### Blob indisponible
+
+L'événement demeure dans la file de traitement.
+
+Une nouvelle tentative est effectuée ultérieurement.
+
+---
+
+#### SQL indisponible
+
+L'événement demeure dans la file de traitement.
+
+Une nouvelle tentative est effectuée ultérieurement.
+
+---
+
+#### Échec de cohérence
+
+Si l'un des deux artefacts est créé mais pas l'autre :
+
+- L'événement est considéré comme incomplet
+- Une alerte est générée
+- Une procédure de reprise est exécutée
+
+---
+
+### Principe fondamental
+
+Un événement d'audit est considéré valide uniquement lorsque :
+
+- Le Blob existe
+- L'index SQL existe
+- Les deux partagent le même AuditEventId
+
+La cohérence entre ces deux systèmes constitue une exigence critique de l'architecture.
+
+---
+
+### Disponibilité des applications
+
+L'indisponibilité de la plateforme d'audit ne doit jamais empêcher une opération métier.
+
+Exemples :
+
+- Ouverture d'une dictée
+- Modification d'une transcription
+- Connexion utilisateur
+
+La plateforme d'audit doit être conçue pour minimiser tout impact sur les applications consommatrices.
+
+---
+
+### Monitoring
+
+Les indicateurs suivants doivent être surveillés :
+
+- Nombre d'événements reçus
+- Nombre d'événements archivés
+- Nombre d'événements en erreur
+- Événements sans Blob
+- Événements sans index SQL
+- Temps moyen de traitement
+- Taille de la file d'attente
+
+Des alertes doivent être générées lorsqu'une incohérence est détectée.
+
 ## Vision long terme
 
 Le système d'audit doit être conçu comme une plateforme centralisée pouvant être utilisée par plusieurs applications.
