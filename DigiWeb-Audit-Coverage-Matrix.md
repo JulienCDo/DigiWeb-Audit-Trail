@@ -1,179 +1,261 @@
 # DigiWeb Audit Coverage Matrix
 
-## Objectif
+## Purpose
 
-Identifier l'ensemble des fonctionnalités DigiWeb devant produire des événements d'audit.
+Identify all DigiWeb business functions that require audit event generation.
 
-Cette matrice permet de :
+This matrix is used to:
 
-- Vérifier que toutes les fonctionnalités sont couvertes
-- Identifier les écarts de conformité
-- Évaluer l'effort de développement
-- Prioriser les travaux d'implémentation
-- Valider que chaque rapport d'audit peut être alimenté
-
----
-
-# État de couverture
-
-| Fonctionnalité | Audit existant | Événements requis | Priorité |
-|---------------|---------------|------------------|----------|
-| Authentification | Non | LoginSucceeded, LoginFailed, Logout, SessionExpired | Haute |
-| Consultation de dictée | Non | DictationOpened, DictationViewed | Haute |
-| Changement de statut de dictée | Non | DictationStatusChanged | Haute |
-| Création de dictée | Non | DictationCreated | Moyenne |
-| Archivage de dictée | Non | DictationArchived | Moyenne |
-| Création de transcription | Non | TranscriptionCreated | Haute |
-| Modification de transcription | Non | TranscriptionModified | Haute |
-| Révision de transcription | Non | TranscriptionReviewed | Haute |
-| Approbation de transcription | Non | TranscriptionApproved | Haute |
-| Signature de transcription | Non | TranscriptionSigned | Haute |
-| Rejet de transcription | Non | TranscriptionRejected | Haute |
-| Retour pour correction | Non | TranscriptionReturned | Haute |
-| Lecture audio | Non | PlaybackStarted, PlaybackPaused, PlaybackStopped | Moyenne |
-| Téléchargement audio | Non | AudioDownloaded | Haute |
-| Suppression audio | Non | AudioDeleted | Haute |
-| Purge audio | Non | AudioPurged | Haute |
-| Attribution de rôle | Non | RoleAssigned | Haute |
-| Retrait de rôle | Non | RoleRemoved | Haute |
-| Modification de permission | Non | PermissionChanged | Haute |
-| Création utilisateur | Non | UserCreated | Moyenne |
-| Désactivation utilisateur | Non | UserDisabled | Moyenne |
-| Exécution de rapport | Non | ReportExecuted | Moyenne |
-| Export de rapport | Non | ReportExported | Moyenne |
-| Assistance IA | Non | AIAssistanceRequested, AIAssistanceCompleted, AIAssistanceFailed | Faible |
-| Gestion des verrous | Non | LockAcquired, LockReleased, LockDenied | Moyenne |
-| Temps de transcription | Non | TranscriptionWorkStarted, TranscriptionWorkStopped | Haute |
-| Mesures de productivité | Non | ProductivityCalculated | Haute |
-
+- Validate audit coverage across the application
+- Identify compliance gaps
+- Estimate development effort
+- Prioritize implementation work
+- Ensure all required audit reports can be generated
+- Maintain a minimal and business-focused audit footprint
 
 ---
 
-# Couverture des rapports
+# Audit Coverage Status
 
-## Access Audit
-
-| Événement |
-|------------|
-| DictationOpened |
-| DictationViewed |
-
----
-
-## Detailed Reports - Transcription
-
-| Événement |
-|------------|
-| TranscriptionCreated |
-| TranscriptionModified |
-| TranscriptionReviewed |
-| TranscriptionApproved |
-| TranscriptionSigned |
-| TranscriptionRejected |
-| TranscriptionReturned |
+| Business Function | Existing Audit | Required Event | Priority |
+|------------------|----------------|----------------|----------|
+| User Authentication | No | LOGIN | High |
+| User Logout | No | LOGOUT | High |
+| Dictation Access | No | DICTATION_ACCESSED | High |
+| Dictation Status Change | No | DICTATION_STATUS_CHANGED | High |
+| Dictation Recording Purge | No | DICTATION_PURGED | High |
+| Transcription Modification | No | TRANSCRIPTION_MODIFIED | High |
+| Transcription Status Change | No | TRANSCRIPTION_STATUS_CHANGED | High |
+| Report Execution | No | REPORT_EXECUTED | Medium |
+| Transcription Work Tracking | No | WORK_SESSION | High |
 
 ---
 
-## Dictation Status History
+# Reporting Coverage
 
-| Événement |
-|------------|
-| DictationStatusChanged |
+## Access Audit Report
 
----
+**Business Question**
 
-## Security Audit
+Who accessed a specific dictation?
 
-| Événement |
-|------------|
-| LoginSucceeded |
-| LoginFailed |
-| SessionExpired |
-| RoleAssigned |
-| RoleRemoved |
-| PermissionChanged |
-| UserDisabled |
+| Event |
+|---------|
+| DICTATION_ACCESSED |
 
 ---
 
-## Audio Audit
+## Transcription Detailed Report
 
-| Événement |
-|------------|
-| AudioDownloaded |
-| AudioDeleted |
-| AudioPurged |
+**Business Question**
 
----
+Who modified a transcription?
 
-## AI Usage Audit
-
-| Événement |
-|------------|
-| AIAssistanceRequested |
-| AIAssistanceCompleted |
-| AIAssistanceFailed |
+| Event |
+|---------|
+| TRANSCRIPTION_MODIFIED |
 
 ---
 
-# Analyse des écarts
+## Dictation Status History Report
 
-## Must Have
+**Business Question**
 
-### Conformité
+How did a dictation move through its lifecycle?
 
-- [ ] Authentification
-- [ ] Consultation de dictée
-- [ ] Historique des statuts
-- [ ] Modifications des transcriptions
-- [ ] Gestion des permissions
-- [ ] Purge audio
-
-### Objectif
-
-Permettre l'audit réglementaire et l'investigation des accès.
+| Event |
+|---------|
+| DICTATION_STATUS_CHANGED |
 
 ---
 
-## Should Have
+## User Activity Audit Report
 
-- [ ] Lecture audio
-- [ ] Gestion des verrous
-- [ ] Exécution de rapports
+**Business Questions**
 
-### Objectif
+- Who logged in?
+- Who logged out?
+- Who changed statuses?
+- Who purged recordings?
+- Who ran reports?
 
-Améliorer la traçabilité opérationnelle.
-
----
-
-## Nice To Have
-
-- [ ] Audit IA
-- [ ] Exports détaillés
-- [ ] Analyse avancée
-
-### Objectif
-
-Préparer les futures capacités analytiques.
+| Event |
+|---------|
+| LOGIN |
+| LOGOUT |
+| DICTATION_STATUS_CHANGED |
+| TRANSCRIPTION_STATUS_CHANGED |
+| DICTATION_PURGED |
+| REPORT_EXECUTED |
 
 ---
 
-# Résumé
+## Time Analysis Report
 
-## Nombre de fonctionnalités couvertes
+**Business Question**
 
-- Authentication
-- Dictation
-- Transcription
-- Audio
-- Administration
-- Reporting
-- AI
+How much time did each transcriptionist spend working on a dictation?
 
-## Statut
+| Event |
+|---------|
+| WORK_SESSION |
 
-- [ ] Couverture fonctionnelle validée
-- [ ] Événements validés avec les experts métier
-- [ ] Priorités validées
-- [ ] Prêt pour la conception d'architecture
+---
+
+## True Productivity Report
+
+**Business Question**
+
+What productive transcription work was completed during a period?
+
+| Event |
+|---------|
+| WORK_SESSION |
+
+---
+
+## Report Usage Audit
+
+**Business Question**
+
+Who executed audit or management reports?
+
+| Event |
+|---------|
+| REPORT_EXECUTED |
+
+---
+
+# Customer Requirement Mapping
+
+| Customer Requirement | Audit Event |
+|---------------------|-------------|
+| User log on | LOGIN |
+| User log off | LOGOUT |
+| List of users who accessed a dictation | DICTATION_ACCESSED |
+| Users who modified transcriptions | TRANSCRIPTION_MODIFIED |
+| Change of dictation status | DICTATION_STATUS_CHANGED |
+| Change of transcription status | TRANSCRIPTION_STATUS_CHANGED |
+| Dictation recording purges | DICTATION_PURGED |
+| Running of a report | REPORT_EXECUTED |
+| Time spent transcribing | WORK_SESSION |
+| True productivity measures | WORK_SESSION |
+
+---
+
+# Out-of-Scope Events (Version 1)
+
+The following event categories are intentionally excluded from the initial implementation because they do not directly support current customer audit requirements.
+
+## User Interface Events
+
+- Button Clicked
+- Menu Opened
+- Screen Navigated
+- Tab Selected
+- Filter Changed
+
+## Audio Activity Events
+
+- Playback Started
+- Playback Paused
+- Playback Stopped
+- Audio Downloaded
+
+## Administrative Events
+
+- User Created
+- User Disabled
+- Role Assigned
+- Role Removed
+- Permission Changed
+
+## Technical Events
+
+- Session Expired
+- Lock Acquired
+- Lock Released
+- Lock Denied
+
+## AI-related Events
+
+- AI Assistance Requested
+- AI Assistance Completed
+- AI Assistance Failed
+
+These events may be added in future releases if justified by business, compliance, or customer requirements.
+
+---
+
+# Gap Analysis
+
+## Must Have (Customer Requirements)
+
+- [ ] LOGIN
+- [ ] LOGOUT
+- [ ] DICTATION_ACCESSED
+- [ ] DICTATION_STATUS_CHANGED
+- [ ] DICTATION_PURGED
+- [ ] TRANSCRIPTION_MODIFIED
+- [ ] TRANSCRIPTION_STATUS_CHANGED
+- [ ] WORK_SESSION
+- [ ] REPORT_EXECUTED
+
+### Goal
+
+Deliver all customer-requested audit and reporting capabilities with the minimum viable audit model.
+
+---
+
+## Should Have (Future Releases)
+
+- [ ] Audio Access Auditing
+- [ ] Administrative Activity Auditing
+- [ ] Audit Report Export Tracking
+- [ ] Security Administration Auditing
+
+### Goal
+
+Improve operational traceability and administrative oversight.
+
+---
+
+## Nice To Have (Future Analytics)
+
+- [ ] AI Usage Auditing
+- [ ] Cross-Application Analytics
+- [ ] Microsoft Fabric Integration
+- [ ] Long-Term Historical Analytics
+
+### Goal
+
+Extend reporting and analytical capabilities once production usage patterns and volumes are better understood.
+
+---
+
+# Summary
+
+## Audit Model Scope
+
+The Version 1 audit platform intentionally limits itself to:
+
+- 9 audit events
+- Azure Cosmos DB as the single source of truth
+- Multi-tenant support
+- Customer-required reporting scenarios only
+
+## Applications Supported
+
+- DigiWeb
+- DigiConsole
+- Future Applications
+
+## Status
+
+- [x] Functional audit coverage defined
+- [x] Event catalog simplified
+- [x] Customer requirements mapped
+- [x] Storage model simplified (Cosmos DB)
+- [x] Multi-tenant requirements addressed
+- [ ] Architecture implementation ready
+- [ ] Development planning complete
