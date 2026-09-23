@@ -72,7 +72,7 @@ Applications
 
 La plateforme d'audit centralisée est composée des éléments suivants :
 
-- Audit API
+- Audit gRPC API
 - Audit Service
 - Audit Repository
 - Audit Index
