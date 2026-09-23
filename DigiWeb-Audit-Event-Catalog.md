@@ -16,11 +16,11 @@ Chaque événement doit :
 
 # Authentication
 
-## LoginSucceeded
+## Login
 
 ### Description
 
-Authentification réussie d'un utilisateur.
+Authentification d'un utilisateur.
 
 ### Category
 
@@ -32,7 +32,7 @@ User
 
 ### Outcome
 
-Success
+Success/Failure
 
 ### Severity
 
@@ -51,40 +51,6 @@ Info
 
 - Security Audit Report
 - User Activity Audit
-
----
-
-## LoginFailed
-
-### Description
-
-Tentative d'authentification échouée.
-
-### Category
-
-Authentication
-
-### EntityType
-
-User
-
-### Outcome
-
-Failed
-
-### Severity
-
-Warning
-
-### Données minimales requises
-
-- UserName
-- TenantId
-- IpAddress
-
-### Utilisé dans
-
-- Security Audit Report
 
 ---
 
@@ -122,146 +88,9 @@ Info
 
 ---
 
-## SessionExpired
-
-### Description
-
-Expiration automatique d'une session.
-
-### Category
-
-Authentication
-
-### EntityType
-
-User
-
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
-### Données minimales requises
-
-- UserId
-- UserName
-- SessionId
-
-### Utilisé dans
-
-- Security Audit Report
-- User Activity Audit
-
----
-
-## PasswordReset
-
-### Description
-
-Réinitialisation du mot de passe d'un utilisateur.
-
-### Category
-
-Authentication
-
-### EntityType
-
-User
-
-### Outcome
-
-Success
-
-### Severity
-
-Warning
-
-### Données minimales requises
-
-- UserId
-- UserName
-- UserRole
-
-### Utilisé dans
-
-- Security Audit Report
-
----
-
-## AccountLocked
-
-### Description
-
-Verrouillage d'un compte utilisateur.
-
-### Category
-
-Authentication
-
-### EntityType
-
-User
-
-### Outcome
-
-Success
-
-### Severity
-
-Warning
-
-### Données minimales requises
-
-- UserId
-- UserName
-- UserRole
-
-### Utilisé dans
-
-- Security Audit Report
-
----
-
 # Dictation
 
-## DictationCreated
-
-### Description
-
-Création d'une nouvelle dictée.
-
-### Category
-
-Dictation
-
-### EntityType
-
-Dictation
-
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
-### Données minimales requises
-
-- DictationId
-- UserId
-- UserName
-
-### Utilisé dans
-
-- Operational Audit
-
----
-
-## DictationOpened
+## DictationAccessed
 
 ### Description
 
@@ -296,85 +125,7 @@ Info
 
 ---
 
-## DictationViewed
-
-### Description
-
-Une dictée est consultée en lecture.
-
-### Category
-
-Dictation
-
-### EntityType
-
-Dictation
-
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
-### Données minimales requises
-
-- DictationId
-- UserId
-- UserName
-- UserRole
-
-### Utilisé dans
-
-- Access Audit Report
-
----
-
-## DictationStatusChanged
-
-### Description
-
-Le statut d'une dictée est modifié.
-
-### Category
-
-Dictation
-
-### EntityType
-
-Dictation
-
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
-### Données minimales requises
-
-- DictationId
-- UserId
-- UserName
-
-### Details
-
-```json
-{
-  "oldStatus": "Reserved",
-  "newStatus": "Completed"
-}
-```
-
-### Utilisé dans
-
-- Dictation Status History Report
-
----
-
-## DictationArchived
+## DictationPurged
 
 ### Description
 
