@@ -1,1112 +1,368 @@
-# DigiWeb Audit Event Catalog
+# DigiWeb Audit Platform  
+# Audit Event Catalog
 
-## Objectif
-
-Définir l'ensemble des événements d'audit qui doivent être enregistrés par DigiWeb/Synnefo.
-
-Chaque événement doit :
-
-- Posséder une définition claire
-- Être associé à une catégorie
-- Indiquer les données minimales à enregistrer
-- Répondre à un besoin métier, réglementaire ou opérationnel
-- Pouvoir être exploité par un ou plusieurs rapports d'audit
+Version: 1.0  
+Status: Approved  
+Phase: Architecture
 
 ---
 
-# Authentication
+# 1. Purpose
 
-## Login
+This document defines the audit events recorded by the DigiWeb Audit Platform.
 
-### Description
+The catalog contains only events required to satisfy:
 
-Authentification d'un utilisateur.
+- Customer audit requirements
+- Security investigations
+- Productivity reporting
+- Compliance reporting
 
-### Category
-
-Authentication
-
-### EntityType
-
-User
-
-### Outcome
-
-Success/Failure
-
-### Severity
-
-Info
-
-### Données minimales requises
-
-- UserId
-- UserName
-- UserRole
-- TenantId
-- SessionId
-- IpAddress
-
-### Utilisé dans
-
-- Security Audit Report
-- User Activity Audit
+Events without a demonstrated business, compliance, or reporting value are intentionally excluded.
 
 ---
 
-## Logout
+# 2. Event Design Principles
 
-### Description
+## Business-Oriented Events
 
-Déconnexion utilisateur.
+Events represent meaningful business or security actions.
 
-### Category
+Examples:
 
-Authentication
+- User login
+- Dictation access
+- Transcription modification
+- Status change
+- Report execution
 
-### EntityType
+---
 
-User
+## Minimal Data Collection
 
-### Outcome
+Each event contains only the information required to answer audit and reporting questions.
 
-Success
+Additional metadata is stored only when necessary.
 
-### Severity
+---
 
-Info
+# 3. Event Catalog
 
-### Données minimales requises
+---
 
-- UserId
-- UserName
-- SessionId
+# LOGIN
 
-### Utilisé dans
+## Description
+
+A user successfully authenticates to the application.
+
+## Purpose
+
+Supports:
 
 - User Activity Audit
+- Security investigations
 
----
+## Target
 
-# Dictation
+None
 
-## DictationAccessed
-
-### Description
-
-Un utilisateur ouvre une dictée.
-
-### Category
-
-Dictation
-
-### EntityType
-
-Dictation
-
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
-### Données minimales requises
-
-- DictationId
-- UserId
-- UserName
-- UserRole
-
-### Utilisé dans
-
-- Access Audit Report
-
----
-
-## DictationPurged
-
-### Description
-
-Archivage d'une dictée.
-
-### Category
-
-Dictation
-
-### EntityType
-
-Dictation
-
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
-### Données minimales requises
-
-- DictationId
-- UserId
-- UserName
-
-### Utilisé dans
-
-- Dictation Status History Report
-
----
-
-# Transcription
-
-## TranscriptionCreated
-
-### Description
-
-Création d'une transcription.
-
-### Category
-
-Transcription
-
-### EntityType
-
-Transcription
-
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
-### Utilisé dans
-
-- Transcription Detailed Report
-
----
-
-## TranscriptionModified
-
-### Description
-
-Modification du contenu d'une transcription.
-
-### Category
-
-Transcription
-
-### EntityType
-
-Transcription
-
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
-### Details
+## Example
 
 ```json
 {
-  "version": 3,
-  "changeType": "Correction"
+  "event": "LOGIN"
 }
 ```
 
-### Utilisé dans
-
-- Transcription Detailed Report
-
 ---
 
-## TranscriptionStatusChanged
+# LOGOUT
 
-### Description
+## Description
 
-Changement de statut d'une transcription.
+A user ends an authenticated session.
 
-### Category
+## Purpose
 
-Transcription
+Supports:
 
-### EntityType
+User Activity Audit
+Security investigations  
 
-Transcription
+## Target
 
-### Outcome
+None
 
-Success
-
-### Severity
-
-Info
-
-### Details
-
+## Example
 ```json
 {
-  "oldStatus": "Draft",
-  "newStatus": "Reviewed"
+"event": "LOGOUT"
 }
 ```
 
-### Utilisé dans
-
-- Transcription Detailed Report
-- User Activity Audit
-
 ---
 
-## TranscriptionReviewed
+# DICTATION_ACCESSED
 
-### Description
+## Description
 
-Révision effectuée sur une transcription.
+A user accesses or opens a dictation.
 
-### Category
+## Purpose
 
-Transcription
+Supports:
 
-### EntityType
+Access Audit Report
+Security investigations
 
-Transcription
-
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
-### Utilisé dans
-
-- Transcription Detailed Report
-
----
-
-## TranscriptionApproved
-
-### Description
-
-Transcription approuvée.
-
-### Category
-
-Transcription
-
-### EntityType
-
-Transcription
-
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
-### Utilisé dans
-
-- Transcription Detailed Report
-
----
-
-## TranscriptionSigned
-
-### Description
-
-Transcription signée.
-
-### Category
-
-Transcription
-
-### EntityType
-
-Transcription
-
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
-### Utilisé dans
-
-- Transcription Detailed Report
-
----
-
-## TranscriptionRejected
-
-### Description
-
-Transcription rejetée.
-
-### Category
-
-Transcription
-
-### EntityType
-
-Transcription
-
-### Outcome
-
-Success
-
-### Severity
-
-Warning
-
-### Utilisé dans
-
-- Transcription Detailed Report
-
----
-
-## TranscriptionReturned
-
-### Description
-
-Transcription retournée pour correction.
-
-### Category
-
-Transcription
-
-### EntityType
-
-Transcription
-
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
-### Utilisé dans
-
-- Transcription Detailed Report
-
----
-
-# Productivity
-
-## TranscriptionWorkStarted
-
-### Description
-
-Début d'une période active de transcription.
-
-### Category
-
-Transcription
-
-### EntityType
+## Target
 
 Dictation
 
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
-### Données minimales requises
-
-- DictationId
-- UserId
-- UserName
-- UserRole
-
-### Utilisé dans
-
-- Time Analysis Report
-- True Productivity Report
+## Example
+```json
+{
+"event": "DICTATION_ACCESSED",
+"targetId": "DICT001"
+}
+```
 
 ---
 
-## TranscriptionWorkStopped
+# DICTATION_STATUS_CHANGED
 
-### Description
+## Description
 
-Fin d'une période active de transcription.
+The status of a dictation changes.
 
-### Category
+## Purpose
 
-Transcription
+Supports:
 
-### EntityType
+User Activity Audit
+Operational reporting
+Workflow tracking
+
+## Target
 
 Dictation
 
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
-### Details
-
+## Data Attributes
 ```json
 {
-  "durationSeconds": 1200
+"from": "New",
+"to": "Assigned"
 }
 ```
 
-### Utilisé dans
-
-- Time Analysis Report
-- True Productivity Report
-
----
-
-## ProductivityCalculated
-
-### Description
-
-Calcul d'indicateurs de productivité.
-
-### Category
-
-Reporting
-
-### EntityType
-
-Productivity
-
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
-### Utilisé dans
-
-- True Productivity Report
-
----
-
-# Audio
-
-## PlaybackStarted
-
-### Description
-
-Début de lecture audio.
-
-### Category
-
-Audio
-
-### EntityType
-
-AudioFile
-
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
-### Utilisé dans
-
-- User Activity Audit
-
----
-
-## PlaybackPaused
-
-### Description
-
-Pause de lecture audio.
-
-### Category
-
-Audio
-
-### EntityType
-
-AudioFile
-
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
----
-
-## PlaybackStopped
-
-### Description
-
-Arrêt de lecture audio.
-
-### Category
-
-Audio
-
-### EntityType
-
-AudioFile
-
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
----
-
-## AudioDownloaded
-
-### Description
-
-Téléchargement d'un fichier audio.
-
-### Category
-
-Audio
-
-### EntityType
-
-AudioFile
-
-### Outcome
-
-Success
-
-### Severity
-
-Warning
-
-### Utilisé dans
-
-- File Access Audit Report
-
----
-
-## AudioDeleted
-
-### Description
-
-Suppression d'un fichier audio.
-
-### Category
-
-Audio
-
-### EntityType
-
-AudioFile
-
-### Outcome
-
-Success
-
-### Severity
-
-Warning
-
-### Utilisé dans
-
-- File Access Audit Report
-
----
-
-## AudioPurged
-
-### Description
-
-Suppression définitive d'un fichier audio.
-
-### Category
-
-Audio
-
-### EntityType
-
-AudioFile
-
-### Outcome
-
-Success
-
-### Severity
-
-Critical
-
-### Details
-
+## Example
 ```json
 {
-  "purgeType": "Manual",
-  "reason": "Retention Policy"
+"event": "DICTATION_STATUS_CHANGED",
+"targetId": "DICT001",
+"data": {
+"from": "New",
+"to": "Assigned"
+}
 }
 ```
 
-### Utilisé dans
+---
 
-- File Access Audit Report
+# DICTATION_PURGED
+
+## Description
+
+A dictation recording is permanently deleted or purged.
+
+## Purpose
+
+Supports:
+
+User Activity Audit
+Compliance investigations
+
+## Target
+
+Dictation
+
+## Example
+```json
+{
+"event": "DICTATION_PURGED",
+"targetId": "DICT001"
+}
+```
 
 ---
 
-# Reporting
+# TRANSCRIPTION_MODIFIED
 
-## ReportExecuted
+## Description
 
-### Description
+A user modifies the contents of a transcription.
 
-Exécution d'un rapport.
+## Purpose
 
-### Category
+Supports:
 
-Reporting
+Transcription Detailed Report
+Audit investigations
 
-### EntityType
+## Target
+
+Transcription
+
+## Example
+```json
+{
+"event": "TRANSCRIPTION_MODIFIED",
+"targetId": "TR001"
+}
+```
+
+---
+
+# TRANSCRIPTION_STATUS_CHANGED
+
+## Description
+
+The workflow status of a transcription changes.
+
+## Purpose
+
+Supports:
+
+User Activity Audit
+Workflow reporting
+Operational reporting
+
+## Target
+
+Transcription
+
+## Data Attributes
+```json
+{
+"from": "Draft",
+"to": "Completed"
+}
+```
+
+## Example
+```json
+{
+"event": "TRANSCRIPTION_STATUS_CHANGED",
+"targetId": "TR001",
+"data": {
+"from": "Draft",
+"to": "Completed"
+}
+}
+```
+
+---
+
+# WORK_SESSION
+
+## Description
+
+Represents a completed transcription work session performed by a user.
+
+A work session records the effective time spent working on a dictation.
+
+## Purpose
+
+Supports:
+
+Time Analysis Report
+True Productivity Report
+
+## Target
+
+Dictation
+
+## Data Attributes
+```json
+{
+"minutes": 18
+}
+```
+
+## Example
+```json
+{
+"event": "WORK_SESSION",
+"targetId": "DICT001",
+"data": {
+"minutes": 18
+}
+}
+```
+
+---
+
+# REPORT_EXECUTED
+
+## Description
+
+A user executes an audit, operational, or management report.
+
+## Purpose
+
+Supports:
+
+User Activity Audit
+Report Usage Audit
+Administrative monitoring
+
+## Target
 
 Report
 
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
-### Details
-
+## Example
 ```json
 {
-  "executionDurationMs": 1523,
-  "parameters": {}
+"event": "REPORT_EXECUTED",
+"targetId": "AccessAuditReport"
 }
 ```
 
-### Utilisé dans
+---
 
-- Report Usage Audit Report
+# 4. Traceability to Customer Requirements
 
 ---
 
-## ReportExported
-
-### Description
-
-Export d'un rapport.
-
-### Category
-
-Reporting
-
-### EntityType
-
-Report
-
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
-### Utilisé dans
-
-- Report Usage Audit Report
+| Customer Requirement                   | Event                          |
+| -------------------------------------- | ------------------------------ |
+| User log on/off                        | LOGIN, LOGOUT                  |
+| List of users who accessed a dictation | DICTATION\_ACCESSED            |
+| Users who changed transcriptions       | TRANSCRIPTION\_MODIFIED        |
+| Change of dictation status             | DICTATION\_STATUS\_CHANGED     |
+| Change of transcription status         | TRANSCRIPTION\_STATUS\_CHANGED |
+| Dictation recording purges             | DICTATION\_PURGED              |
+| Running of a report                    | REPORT\_EXECUTED               |
+| Time spent transcribing                | WORK\_SESSION                  |
+| True productivity measures             | WORK\_SESSION                  |
 
 ---
 
-# Administration
-
-## UserCreated
-
-### Description
-
-Création d'un utilisateur.
-
-### Category
-
-Administration
-
-### EntityType
-
-User
-
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
----
-
-## UserDisabled
-
-### Description
-
-Désactivation d'un utilisateur.
-
-### Category
-
-Administration
-
-### EntityType
-
-User
-
-### Outcome
-
-Success
-
-### Severity
-
-Warning
-
----
-
-## RoleAssigned
-
-### Description
-
-Attribution d'un rôle.
-
-### Category
-
-Administration
-
-### EntityType
-
-Role
-
-### Outcome
-
-Success
-
-### Severity
-
-Warning
-
-### Utilisé dans
-
-- Security Audit Report
-
----
-
-## RoleRemoved
-
-### Description
-
-Retrait d'un rôle.
-
-### Category
-
-Administration
-
-### EntityType
-
-Role
-
-### Outcome
-
-Success
-
-### Severity
-
-Warning
-
-### Utilisé dans
-
-- Security Audit Report
-
----
-
-## PermissionChanged
-
-### Description
-
-Modification d'une permission.
-
-### Category
-
-Administration
-
-### EntityType
-
-Permission
-
-### Outcome
-
-Success
-
-### Severity
-
-Critical
-
-### Utilisé dans
-
-- Security Audit Report
-
----
-
-# Lock Management
-
-## LockAcquired
-
-### Description
-
-Obtention d'un verrou.
-
-### Category
-
-System
-
-### EntityType
-
-Dictation
-
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
----
-
-## LockReleased
-
-### Description
-
-Libération d'un verrou.
-
-### Category
-
-System
-
-### EntityType
-
-Dictation
-
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
----
-
-## LockDenied
-
-### Description
-
-Refus d'obtention d'un verrou.
-
-### Category
-
-System
-
-### EntityType
-
-Dictation
-
-### Outcome
-
-Denied
-
-### Severity
-
-Warning
-
----
-
-# Speech Recognition
-
-## SpeechStarted
-
-### Description
-
-Démarrage de la reconnaissance vocale.
-
-### Category
-
-AI
-
-### EntityType
-
-Dictation
-
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
----
-
-## SpeechStopped
-
-### Description
-
-Arrêt de la reconnaissance vocale.
-
-### Category
-
-AI
-
-### EntityType
-
-Dictation
-
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
----
-
-## SpeechFailed
-
-### Description
-
-Échec de la reconnaissance vocale.
-
-### Category
-
-AI
-
-### EntityType
-
-Dictation
-
-### Outcome
-
-Failed
-
-### Severity
-
-Warning
-
----
-
-# AI
-
-## AIAssistanceRequested
-
-### Description
-
-Demande d'assistance IA.
-
-### Category
-
-AI
-
-### EntityType
-
-Transcription
-
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
-### Utilisé dans
-
-- AI Usage Audit Report
-
----
-
-## AIAssistanceCompleted
-
-### Description
-
-Assistance IA complétée avec succès.
-
-### Category
-
-AI
-
-### EntityType
-
-Transcription
-
-### Outcome
-
-Success
-
-### Severity
-
-Info
-
-### Utilisé dans
-
-- AI Usage Audit Report
-
----
-
-## AIAssistanceFailed
-
-### Description
-
-Échec d'une opération d'assistance IA.
-
-### Category
-
-AI
-
-### EntityType
-
-Transcription
-
-### Outcome
-
-Failed
-
-### Severity
-
-Warning
-
-### Utilisé dans
-
-- AI Usage Audit Report
+# 6. Summary
+
+The Version 1 audit catalog intentionally remains minimal.
+
+The platform records only nine high-value business and security events:
+
+LOGIN  
+LOGOUT  
+DICTATION_ACCESSED  
+DICTATION_STATUS_CHANGED  
+DICTATION_PURGED  
+TRANSCRIPTION_MODIFIED  
+TRANSCRIPTION_STATUS_CHANGED  
+WORK_SESSION  
+REPORT_EXECUTED  
+
+This event set satisfies the current customer audit requirements while minimizing storage, complexity, and long-term maintenance costs.
