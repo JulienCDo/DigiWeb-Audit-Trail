@@ -1,575 +1,548 @@
-# DigiWeb Audit Report Specifications
+# DigiWeb Audit Platform
+# Audit Reports Specifications
 
-## Objectif
-
-Définir précisément les rapports d'audit disponibles dans DigiWeb/Synnefo.
-
-Chaque rapport doit documenter :
-
-- Son objectif
-- Les événements utilisés
-- Les filtres disponibles
-- Les colonnes affichées
-- Les formats d'export
-- Les permissions requises
-- Des exemples de résultats
+Phase: Architecture
 
 ---
 
-# Access Audit Report
+# 1. Purpose
 
-## Description
+This document defines the audit reports supported by the DigiWeb Audit Platform.
 
-Permet d'identifier tous les utilisateurs ayant consulté une dictée.
+The reports are designed to satisfy:
 
-## Événements utilisés
+- Customer audit requirements
+- Operational traceability needs
+- Compliance investigations
+- Productivity analysis
+- Management reporting
 
-- DictationOpened
-- DictationViewed
-
-## Filtres
-
-- Date début
-- Date fin
-- DictationId
-- Utilisateur
-- UserRole
-- Site
-- Département
-
-## Colonnes
-
-- Date/Heure
-- DictationId
-- UserId
-- UserName
-- UserRole
-- Workstation
-- IpAddress
-- Action
-
-## Exemple
-
-| Date/Heure | DictationId | Utilisateur | Rôle | Action | IP |
-|------------|------------|------------|------------|------------|------------|
-| 2026-09-22 09:01 | D-100345 | Jane Doe | Transcriptionist | Opened | 10.10.10.1 |
-| 2026-09-22 09:02 | D-100345 | John Smith | Reviewer | Viewed | 10.10.10.2 |
-
-## Export
-
-- CSV
-- Excel
-- PDF (optionnel)
-
-## Sécurité
-
-- Supervisor
-- Administrator
-
-## Cas d'utilisation
-
-- Enquête de confidentialité
-- Audit clinique
-- Vérification des accès non autorisés
+All reports are generated from audit events stored in Azure Cosmos DB.
 
 ---
 
-# Transcription Detailed Report
+# 2. Reporting Principles
 
-## Description
+## Audit Reports Must Be Evidence-Based
 
-Permet d'identifier tous les utilisateurs ayant créé, modifié, révisé ou approuvé une transcription.
+Reports are generated exclusively from recorded audit events.
 
-## Événements utilisés
-
-- TranscriptionCreated
-- TranscriptionModified
-- TranscriptionReviewed
-- TranscriptionApproved
-- TranscriptionSigned
-- TranscriptionRejected
-- TranscriptionReturned
-- TranscriptionStatusChanged
-
-## Filtres
-
-- Date début
-- Date fin
-- TranscriptionId
-- DictationId
-- Utilisateur
-- UserRole
-
-## Colonnes
-
-- Date/Heure
-- TranscriptionId
-- DictationId
-- UserId
-- UserName
-- UserRole
-- Action
-- Version
-- Outcome
-
-## Exemple
-
-| Date/Heure | TranscriptionId | Utilisateur | Rôle | Action | Version |
-|------------|------------|------------|------------|------------|------------|
-| 09:12 | T-2001 | Jane Doe | Transcriptionist | Modified | 3 |
-| 09:20 | T-2001 | Bob Martin | Reviewer | Reviewed | 3 |
-| 09:25 | T-2001 | Dr Smith | Physician | Signed | 3 |
-
-## Export
-
-- CSV
-- Excel
-- PDF (optionnel)
-
-## Sécurité
-
-- Supervisor
-- Administrator
-
-## Cas d'utilisation
-
-- Contrôle qualité
-- Historique des corrections
-- Vérification des responsabilités
+No audit report should rely on inferred or reconstructed data.
 
 ---
 
-# Dictation Status History Report
+## Tenant Isolation
 
-## Description
+All reports must be filtered by tenant.
 
-Historique complet des changements de statut des dictées.
-
-## Événements utilisés
-
-- DictationStatusChanged
-
-## Filtres
-
-- Date début
-- Date fin
-- DictationId
-- Utilisateur
-
-## Colonnes
-
-- Date/Heure
-- DictationId
-- Ancien statut
-- Nouveau statut
-- Utilisateur
-- UserRole
-
-## Exemple
-
-| Date/Heure | DictationId | Ancien statut | Nouveau statut | Utilisateur |
-|------------|------------|------------|------------|------------|
-| 09:00 | D-100345 | Reserved | Busy | Jane Doe |
-| 09:25 | D-100345 | Busy | Completed | Jane Doe |
-
-## Export
-
-- CSV
-- Excel
-
-## Sécurité
-
-- Supervisor
-- Administrator
-
-## Cas d'utilisation
-
-- Audit opérationnel
-- Analyse des processus
-- Vérification des SLA
+Users may only access reports for tenants they are authorized to view.
 
 ---
 
-# Security Audit Report
+## Audit Read-Only Model
 
-## Description
+Audit reports provide visibility into audit data.
 
-Historique des événements liés à la sécurité du système.
-
-## Événements utilisés
-
-- LoginSucceeded
-- LoginFailed
-- Logout
-- SessionExpired
-- PasswordReset
-- AccountLocked
-- RoleAssigned
-- RoleRemoved
-- PermissionChanged
-
-## Filtres
-
-- Date début
-- Date fin
-- Utilisateur
-- Adresse IP
-- Outcome
-- Severity
-
-## Colonnes
-
-- Date/Heure
-- Utilisateur
-- UserRole
-- Adresse IP
-- Événement
-- Outcome
-- Severity
-
-## Exemple
-
-| Date/Heure | Utilisateur | Événement | Résultat | IP |
-|------------|------------|------------|------------|------------|
-| 08:00 | Jane Doe | LoginSucceeded | Success | 10.10.10.1 |
-| 08:05 | John Smith | LoginFailed | Failed | 10.10.10.2 |
-| 09:00 | Administrator | PermissionChanged | Success | 10.10.10.10 |
-
-## Export
-
-- CSV
-- Excel
-- PDF (optionnel)
-
-## Sécurité
-
-- Administrator
-
-## Cas d'utilisation
-
-- Conformité
-- Investigation
-- Audit de sécurité
-- Analyse des incidents
+Reports must not allow modification of audit records.
 
 ---
 
-# Audio Access Audit Report
+## Consistent Filtering
 
-## Description
+All reports should support, where applicable:
 
-Historique des accès et manipulations des enregistrements audio.
-
-## Événements utilisés
-
-- PlaybackStarted
-- AudioDownloaded
-- AudioDeleted
-- AudioPurged
-
-## Filtres
-
-- Date début
-- Date fin
-- DictationId
-- Utilisateur
-
-## Colonnes
-
-- Date/Heure
-- DictationId
-- Utilisateur
-- UserRole
-- Action
-- Outcome
-
-## Exemple
-
-| Date/Heure | DictationId| AudioId | Utilisateur | Action |
-|------------|------------|---------|-------------|--------|
-| 09:00 | D-100345 | A-2001 | Jane Doe | Downloaded |
-| 09:10 | D-100345 | A-2001 | Jane Doe | Playback |
-| 09:20 | D-100345 | A-2001 | Administrator | Purged |
-
-## Export
-
-- CSV
-- Excel
-
-## Sécurité
-
-- Supervisor
-- Administrator
-
-## Cas d'utilisation
-
-- Audit de confidentialité
-- Vérification des suppressions
-- Investigation des accès aux fichiers
+- Date Range
+- User
+- Dictation
+- Transcription
+- Tenant
 
 ---
 
-# Time Analysis Report
+# 3. Access Audit Report
 
-## Description
+## Objective
 
-Permet de mesurer le temps réellement consacré à une dictée par chacun des intervenants.
-
-## Événements utilisés
-
-- TranscriptionWorkStarted
-- TranscriptionWorkStopped
-
-## Filtres
-
-- Date début
-- Date fin
-- DictationId
-- Utilisateur
-- UserRole
-- Site
-- Département
-
-## Colonnes
-
-- DictationId
-- UserId
-- UserName
-- UserRole
-- StartTime
-- StopTime
-- Duration
-
-## Exemple
-
-| Utilisateur | Début | Fin | Temps |
-|------------|------------|------------|------------|
-| Jane Doe | 09:00 | 09:18 | 18 min |
-| Bob Martin | 09:20 | 09:27 | 7 min |
-| John Smith | 09:30 | 09:34 | 4 min |
-
-## Résumé
-
-| DictationId | Temps total |
-|------------|------------|
-| D-100345 | 29 min |
-
-## Export
-
-- CSV
-- Excel
-
-## Sécurité
-
-- Supervisor
-- Administrator
-
-## Cas d'utilisation
-
-- Analyse de productivité
-- Répartition de charge de travail
-- Vérification des temps de traitement
+Identify all users who accessed a specific dictation.
 
 ---
 
-# True Productivity Report
+## Business Questions
 
-## Description
-
-Mesure la productivité réelle des transcriptionnistes.
-
-## Événements utilisés
-
-- TranscriptionCreated
-- TranscriptionModified
-- TranscriptionReviewed
-- TranscriptionApproved
-- TranscriptionSigned
-- TranscriptionWorkStarted
-- TranscriptionWorkStopped
-- DictationStatusChanged
-
-## Filtres
-
-- Période
-- Utilisateur
-- Équipe
-- Site
-- Département
-
-## Indicateurs
-
-- Dictées complétées
-- Documents complétés
-- Temps moyen de transcription
-- Temps moyen de révision
-- Temps moyen de traitement
-- Minutes transcrites par heure
-- Volume traité par utilisateur
-- Productivité par équipe
-- Productivité par site
-
-## Exemple
-
-| Utilisateur | Dictées complétées | Temps total | Temps moyen | Productivité |
-|------------|------------|------------|------------|------------|
-| Jane Doe | 42 | 8h15 | 11.8 min | 5.1 dictées/h |
-| Bob Martin | 31 | 7h50 | 15.2 min | 3.9 dictées/h |
-
-## Export
-
-- CSV
-- Excel
-- PDF (optionnel)
-
-## Sécurité
-
-- Supervisor
-- Administrator
-
-## Cas d'utilisation
-
-- Gestion des opérations
-- Analyse des performances
-- Optimisation des processus
-- Suivi des SLA
+- Who accessed the dictation?
+- When was it accessed?
+- How many users accessed it?
+- How many times was it accessed?
 
 ---
 
-# AI Usage Audit Report
+## Source Event
 
-## Description
-
-Historique de l'utilisation des fonctionnalités d'assistance IA.
-
-## Événements utilisés
-
-- AIAssistanceRequested
-- AIAssistanceCompleted
-- AIAssistanceFailed
-
-## Filtres
-
-- Date début
-- Date fin
-- Utilisateur
-- Outcome
-
-## Colonnes
-
-- Date/Heure
-- Utilisateur
-- UserRole
-- Outcome
-- Durée du traitement
-
-## Exemple
-
-| Date/Heure | Utilisateur | Résultat | Durée |
-|------------|------------|------------|------------|
-| 10:00 | Jane Doe | Success | 4 sec |
-| 10:10 | Bob Martin | Failed | 2 sec |
-
-## Export
-
-- CSV
-- Excel
-
-## Sécurité
-
-- Supervisor
-- Administrator
-
-## Cas d'utilisation
-
-- Adoption des fonctionnalités IA
-- Analyse des performances
-- Contrôle des coûts
-
-## Note
-
-Aucune donnée clinique ou sensible ne doit être enregistrée dans les événements d'audit IA.
+```text
+DICTATION_ACCESSED
+```
 
 ---
 
-# Report Usage Audit Report
+## Available Filters
 
-## Description
-
-Permet d'identifier quels rapports sont exécutés dans le système et par quels utilisateurs.
-
-## Événements utilisés
-
-- ReportExecuted
-- ReportExported
-
-## Filtres
-
-- Date début
-- Date fin
-- Utilisateur
-- Nom du rapport
-
-## Colonnes
-
-- Date/Heure
-- Utilisateur
-- UserRole
-- Nom du rapport
-- Paramètres utilisés
-- Durée d'exécution
-- Action
-
-## Exemple
-
-| Date/Heure | Utilisateur | Rapport | Durée | Export |
-|------------|------------|------------|------------|------------|
-| 10:00 | Supervisor | Access Audit | 1.2 sec | CSV |
-| 10:05 | Administrator | Productivity Report | 3.1 sec | Excel |
-
-## Export
-
-- CSV
-- Excel
-
-## Sécurité
-
-- Administrator
-
-## Cas d'utilisation
-
-- Audit des rapports
-- Analyse d'utilisation
-- Optimisation des performances
+```text
+Date Range
+Dictation ID
+User ID
+```
 
 ---
 
-# Mapping des exigences RFP
+## Report Columns
 
-| Exigence | Rapport |
-|-----------|----------|
-| List of users who have accessed a dictation | Access Audit Report |
-| Users that have made changes to transcriptions | Transcription Detailed Report |
-| Time spent transcribing by all transcriptionists | Time Analysis Report |
-| True Productivity Measures | True Productivity Report |
-| User log on/off | Security Audit Report |
-| Change of dictation status | Dictation Status History Report |
-| Change of transcription status | Transcription Detailed Report |
-| Dictation recording purges | File Access Audit Report |
-| Running of a report | Report Usage Audit Report |
-| Additional audit report variables | Security Audit Report, File Access Audit Report, AI Usage Audit Report |
+```text
+Timestamp
+User ID
+Dictation ID
+Application
+```
 
 ---
 
-# Critères de succès
+## Sample Output
 
-Le document est considéré complet lorsque :
+```text
+2026-09-23 10:15    USR001    DICT1001    DigiWeb
+2026-09-23 10:37    USR015    DICT1001    DigiWeb
+2026-09-23 11:12    USR001    DICT1001    DigiWeb
+```
 
-- Chaque rapport possède une définition claire
-- Chaque rapport indique les événements utilisés
-- Les filtres sont définis
-- Les colonnes sont définies
-- Les formats d'export sont définis
-- Les permissions de consultation sont définies
-- Toutes les exigences du RFP sont couvertes
-- Les développeurs peuvent implémenter directement les rapports
+---
+
+# 4. Detailed Transcription Report
+
+## Objective
+
+Identify users who modified a transcription.
+
+---
+
+## Business Questions
+
+- Who modified the transcription?
+- When was the modification made?
+- How many modifications occurred?
+
+---
+
+## Source Event
+
+```text
+TRANSCRIPTION_MODIFIED
+```
+
+---
+
+## Available Filters
+
+```text
+Date Range
+Transcription ID
+User ID
+```
+
+---
+
+## Report Columns
+
+```text
+Timestamp
+User ID
+Transcription ID
+Application
+```
+
+---
+
+## Sample Output
+
+```text
+2026-09-23 09:12    USR010    TR5001    DigiWeb
+2026-09-23 09:18    USR010    TR5001    DigiWeb
+2026-09-23 09:35    USR022    TR5001    DigiWeb
+```
+
+---
+
+# 5. Dictation Status History Report
+
+## Objective
+
+Provide a complete history of dictation workflow status changes.
+
+---
+
+## Business Questions
+
+- What status changes occurred?
+- Who performed the change?
+- When did the change occur?
+
+---
+
+## Source Event
+
+```text
+DICTATION_STATUS_CHANGED
+```
+
+---
+
+## Available Filters
+
+```text
+Date Range
+Dictation ID
+User ID
+```
+
+---
+
+## Report Columns
+
+```text
+Timestamp
+Dictation ID
+User ID
+Previous Status
+New Status
+Application
+```
+
+---
+
+## Sample Output
+
+```text
+2026-09-23 08:00    DICT1001    USR001    New        Assigned
+2026-09-23 09:15    DICT1001    USR010    Assigned   In Progress
+2026-09-23 10:42    DICT1001    USR010    In Progress Completed
+```
+
+---
+
+# 6. User Activity Audit Report
+
+## Objective
+
+Provide a consolidated timeline of significant user activity.
+
+---
+
+## Business Questions
+
+- Who logged in?
+- Who logged out?
+- Who changed statuses?
+- Who purged a recording?
+- Who executed a report?
+
+---
+
+## Source Events
+
+```text
+LOGIN
+LOGOUT
+DICTATION_STATUS_CHANGED
+TRANSCRIPTION_STATUS_CHANGED
+DICTATION_PURGED
+REPORT_EXECUTED
+```
+
+---
+
+## Available Filters
+
+```text
+Date Range
+User ID
+Event Type
+```
+
+---
+
+## Report Columns
+
+```text
+Timestamp
+User ID
+Event
+Target ID
+Application
+```
+
+---
+
+## Sample Output
+
+```text
+2026-09-23 08:01    USR001    LOGIN                      -
+2026-09-23 08:15    USR001    DICTATION_STATUS_CHANGED   DICT1001
+2026-09-23 09:42    USR010    REPORT_EXECUTED            Access Audit
+2026-09-23 10:05    USR020    DICTATION_PURGED           DICT2100
+2026-09-23 17:02    USR001    LOGOUT                     -
+```
+
+---
+
+# 7. Time Analysis Report
+
+## Objective
+
+Measure transcription effort spent on dictations.
+
+---
+
+## Business Questions
+
+- Who worked on a dictation?
+- How much time did each user spend?
+- What is the total effort for a dictation?
+
+---
+
+## Source Event
+
+```text
+WORK_SESSION
+```
+
+---
+
+## Available Filters
+
+```text
+Date Range
+User ID
+Dictation ID
+```
+
+---
+
+## Report Columns
+
+```text
+Dictation ID
+User ID
+Work Session Count
+Total Minutes
+Total Hours
+```
+
+---
+
+## Sample Output
+
+```text
+DICT1001    USR010    4    72    1.20
+DICT1001    USR022    2    24    0.40
+DICT2001    USR015    3    48    0.80
+```
+
+---
+
+# 8. True Productivity Report
+
+## Objective
+
+Measure productive transcription activity over a period.
+
+---
+
+## Business Questions
+
+- How much transcription work was completed?
+- Which users contributed?
+- How productive was each user?
+
+---
+
+## Source Event
+
+```text
+WORK_SESSION
+```
+
+---
+
+## Available Filters
+
+```text
+Date Range
+User ID
+```
+
+---
+
+## Report Columns
+
+```text
+User ID
+Work Session Count
+Total Minutes
+Total Hours
+```
+
+---
+
+## Sample Output
+
+```text
+USR010    52    984    16.40
+USR015    43    765    12.75
+USR022    39    702    11.70
+```
+
+---
+
+# 9. Report Usage Report
+
+## Objective
+
+Monitor report usage within the platform.
+
+---
+
+## Business Questions
+
+- Which reports are executed most frequently?
+- Who executes reports?
+- When are reports executed?
+
+---
+
+## Source Event
+
+```text
+REPORT_EXECUTED
+```
+
+---
+
+## Available Filters
+
+```text
+Date Range
+Report Name
+User ID
+```
+
+---
+
+## Report Columns
+
+```text
+Timestamp
+User ID
+Report Name
+Application
+```
+
+---
+
+## Sample Output
+
+```text
+2026-09-23 09:05    USR001    Access Audit Report
+2026-09-23 09:35    USR010    Time Analysis Report
+2026-09-23 10:22    USR015    User Activity Report
+```
+
+---
+
+# 10. Export Capabilities
+
+The platform should support export of report results to:
+
+```text
+CSV
+Excel
+PDF
+```
+
+Export activity itself is not audited in Version 1.
+
+---
+
+# 11. Performance Requirements
+
+Reports should support:
+
+```text
+Date filtering
+User filtering
+Entity filtering
+Tenant filtering
+```
+
+The reporting experience should remain responsive for normal operational use.
+
+---
+
+# 12. Security Requirements
+
+Report access must respect:
+
+```text
+Tenant boundaries
+Role-based authorization
+Application security policies
+```
+
+Users must never be able to retrieve audit data belonging to another tenant.
+
+---
+
+# 13. Future Reports
+
+The following reports may be introduced in future releases:
+
+```text
+Security Administration Report
+Audio Access Report
+AI Usage Report
+Role Change Report
+Permission Change Report
+Cross-Application Audit Report
+```
+
+These reports are outside the current Version 1 scope.
+
+---
+
+# 14. Report to Event Mapping
+
+| Report | Required Event(s) |
+|----------|----------|
+| Access Audit Report | DICTATION_ACCESSED |
+| Detailed Transcription Report | TRANSCRIPTION_MODIFIED |
+| Dictation Status History Report | DICTATION_STATUS_CHANGED |
+| User Activity Audit Report | LOGIN, LOGOUT, DICTATION_STATUS_CHANGED, TRANSCRIPTION_STATUS_CHANGED, DICTATION_PURGED, REPORT_EXECUTED |
+| Time Analysis Report | WORK_SESSION |
+| True Productivity Report | WORK_SESSION |
+| Report Usage Report | REPORT_EXECUTED |
+
+---
+
+# 15. Summary
+
+The Version 1 reporting strategy focuses exclusively on customer-required audit capabilities.
+
+Supported reports:
+
+- Access Audit Report
+- Detailed Transcription Report
+- Dictation Status History Report
+- User Activity Audit Report
+- Time Analysis Report
+- True Productivity Report
+- Report Usage Report
+
+These reports are fully supported by the Version 1 audit event catalog and 
