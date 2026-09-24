@@ -88,9 +88,9 @@ DigiWeb / DigiConsole
 - **Contract validation**: events must comply with the defined model and catalog.
 - **Technical traceability**: events support correlation across related operations.
 
-## Planned reports
+## Reports
 
-The MVP is expected to provide the following reports:
+The following reports are defined for the MVP and will be available once the reporting layer is implemented and validated:
 
 - **Access Audit Report**  
   Users who accessed a dictation.
