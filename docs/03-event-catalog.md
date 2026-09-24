@@ -79,7 +79,6 @@ The event must be recorded for successful, failed, and denied login attempts.
 
 ### Reports
 
-- Security Audit Report
 - User Activity Audit Report
 
 ## 3.2 LOGOUT
@@ -129,7 +128,6 @@ SYSTEM
 
 ### Reports
 
-- Security Audit Report
 - User Activity Audit Report
 
 ## 3.3 DICTATION_ACCESSED
