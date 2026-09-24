@@ -1,220 +1,306 @@
-# DigiWeb Audit Trail Architecture
+# DigiWeb Audit Platform
+# Audit Trail Architecture
 
-## Objectif
-
-Définir l'architecture technique permettant :
-
-- La capture des événements d'audit
-- Le stockage centralisé des événements
-- La consultation des événements
-- La génération des rapports
-- La conformité et la traçabilité
-- L'intégration future avec Microsoft Fabric
-
-## Principes
-
-### Source unique de vérité
-
-Tous les événements sont enregistrés dans un système d'audit centralisé.
-
-### Modèle unifié
-
-Tous les événements utilisent la structure AuditEvent.
-
-### Immutabilité
-
-Les événements d'audit ne peuvent pas être modifiés après leur création.
-
-### Faible impact
-
-L'audit ne doit pas ralentir significativement les opérations DigiWeb.
-
-### Extensibilité
-
-Le système doit supporter de nouveaux événements sans modification majeure.
-
-## Architecture cible
-
-```text
-Applications
-
- ├── DigiWeb
- ├── DigiConsole
- └── Future Apps
-
-          │
-
-          ▼
-
-     Audit gRPC API
-
-          ▼
-
-      Audit Service
-
-          ▼
-
-    Internal Queue
-
-          ▼
-
-     Storage Layer
-
-       ├── SQL Index
-       └── Blob Storage
-
-                ▼
-
-          Microsoft Fabric
-```
-
-## Audit Platform
-
-La plateforme d'audit centralisée est composée des éléments suivants :
-
-- Audit gRPC API
-- Audit Service
-- Audit Repository
-- Audit Index
-- Audit Archive
-- Reporting Layer
-
-### Interface
-```
-IAuditService
-{
-    Task LogAsync(AuditEvent auditEvent);
-}
-```
-
-### Utilisation
-```
-await auditService.LogAsync(
-    AuditEventFactory.DictationViewed(...)
-);
-```
-## Audit gRPC API
-
-La plateforme d'audit expose un service gRPC utilisé par les applications consommatrices.
-
-Applications supportées :
-
-- DigiWeb
-- DigiConsole
-- Applications futures
-
-Responsabilités :
-
-- Authentifier les applications
-- Valider les événements reçus
-- Transmettre les événements au pipeline de traitement
-
-L'utilisation de gRPC assure une cohérence avec l'architecture actuelle des services backend DigiWeb.
-
-## Audit Repository
-
-Responsable de la persistance des événements d'audit.
-
-Fonctions :
-
-- Insert
-- GetById
-- Search
-
-### Interface
-```
-IAuditRepository
-{
-    Task InsertAsync(AuditEvent auditEvent);
-
-    Task<SearchResult<AuditEvent>> SearchAsync(...);
-}
-```
-
-## Reporting Layer
-
-Responsable de :
-
-- Générer les rapports d'audit
-- Exécuter les recherches
-- Fournir les données aux interfaces utilisateur
-- Préparer les futures intégrations analytiques
-
-Exemples :
-
-- Access Audit Report
-- Security Audit Report
-- Audio Access Audit Report
-- Time Analysis Report
-- True Productivity Report
-
-
-## Storage 
-Voir:
-[À valider](./DigiWeb-Audit-Storage-Strategy.md)
-
-Principe actuel :
-
-- Azure Blob Storage comme source officielle de conservation
-- Index SQL léger pour les recherches opérationnelles
-- Préparation pour Microsoft Fabric
-
-## Security Model
-
-### Publication
-
-Seules les applications approuvées peuvent publier des événements.
-
-Applications autorisées :
-
-- DigiWeb
-- DigiConsole
-- Applications futures
-
-L'authentification s'effectue au niveau applicatif.
-
-### Consultation
-
-Rôles autorisés :
-
-- Administrator
-- Supervisor
-
-### Modification
-
-Les événements d'audit sont immuables.
-
-Aucune modification manuelle n'est autorisée.
-
-### Suppression
-
-Seules les politiques de rétention approuvées peuvent supprimer des événements.
-
-## Audit Event Processing Flow
-
-### Objectif
-
-Définir le cycle de vie complet d'un événement d'audit depuis sa création par une application jusqu'à sa conservation finale.
-
-Cette architecture vise à :
-
-- Minimiser l'impact sur les applications consommatrices
-- Garantir la cohérence des données
-- Assurer la résilience du système
-- Préparer l'évolutivité future de la plateforme
+Phase: Architecture
 
 ---
 
-### Flux logique
+# 1. Purpose
+
+This document defines the target architecture for the DigiWeb Audit Platform.
+
+The platform provides centralized audit capabilities for:
+
+- DigiWeb
+- DigiConsole
+- Future applications
+
+The objective is to deliver:
+
+- Regulatory audit capabilities
+- Customer-required audit reports
+- Multi-tenant support
+- Centralized audit management
+- Reusable architecture across applications
+- Scalable long-term audit storage
+
+---
+
+# 2. Architectural Goals
+
+The architecture must:
+
+- Support customer audit requirements
+- Support multiple applications
+- Minimize operational complexity
+- Minimize infrastructure components
+- Support asynchronous processing
+- Avoid direct database access from applications
+- Provide a single audit source of truth
+- Scale across tenants and applications
+
+---
+
+# 3. Architectural Principles
+
+## Centralized Audit Platform
+
+Audit functionality is implemented as a shared platform service.
+
+Applications must not implement their own audit repositories.
 
 ```text
-Utilisateur
+DigiWeb
+DigiConsole
+Future Applications
+        │
+        ▼
+Audit Platform
+```
+
+---
+
+## Asynchronous Processing
+
+Business operations must never be blocked by audit persistence.
+
+Audit events are submitted asynchronously.
+
+```text
+Business Action
+       │
+       ├── Success Response
+       │
+       ▼
+Audit Event Queued
+```
+
+Audit failures must not impact business transactions.
+
+---
+
+## Single Source of Truth
+
+Azure Cosmos DB is the authoritative audit datastore.
+
+No secondary audit storage layer exists.
+
+No synchronization between multiple repositories is required.
+
+```text
+Audit Event
+      │
+      ▼
+Azure Cosmos DB
+```
+
+---
+
+## Immutable Events
+
+Audit records are immutable.
+
+Once persisted:
+
+- Events cannot be modified
+- Events cannot be deleted individually
+- Corrections are represented by new events
+
+---
+
+## Multi-Tenant Design
+
+Every audit event belongs to a tenant.
+
+All queries and reports must be tenant-aware.
+
+---
+
+# 4. Target Architecture
+
+```text
+Applications
+├── DigiWeb
+├── DigiConsole
+└── Future Applications
+
+        │
+        ▼
+
+Audit gRPC API
+
+        │
+        ▼
+
+Audit Service
+
+        │
+        ▼
+
+Internal Queue
+
+        │
+        ▼
+
+Azure Cosmos DB
+(Source of Truth)
+
+        │
+        ▼
+
+Reporting APIs
+
+        │
+        ▼
+
+Audit Reports
+```
+
+---
+
+# 5. Components
+
+## Applications
+
+Applications generate audit events when business actions occur.
+
+Examples:
+
+- User login
+- Dictation access
+- Transcription modification
+- Status changes
+- Report execution
+
+Applications never write directly to Cosmos DB.
+
+---
+
+## Audit gRPC API
+
+The Audit Platform exposes a gRPC interface.
+
+All consuming applications communicate through this API.
+
+Responsibilities:
+
+- Receive audit events
+- Validate requests
+- Authenticate applications
+- Forward events for processing
+
+Benefits:
+
+- Strongly typed contracts
+- Consistency across applications
+- High performance
+- Alignment with existing DigiWeb architecture
+
+---
+
+## Audit Service
+
+The Audit Service acts as the core platform component.
+
+Responsibilities:
+
+- Event validation
+- Metadata enrichment
+- Event transformation
+- Queue publishing
+- Error handling
+
+The Audit Service is the only component authorized to persist audit events.
+
+---
+
+## Internal Queue
+
+The internal queue decouples applications from storage operations.
+
+Responsibilities:
+
+- Buffer incoming events
+- Support retry mechanisms
+- Smooth traffic spikes
+- Protect Cosmos DB from bursts
+
+Benefits:
+
+- Non-blocking architecture
+- Better scalability
+- Improved reliability
+
+---
+
+## Azure Cosmos DB
+
+Azure Cosmos DB serves as the authoritative audit repository.
+
+Responsibilities:
+
+- Store all audit events
+- Support reporting queries
+- Support future analytics integration
+- Provide tenant isolation
+
+Cosmos DB replaces:
+
+- Relational audit indexes
+- Blob-based audit storage
+
+---
+
+## Reporting Layer
+
+The reporting layer retrieves audit information from Cosmos DB.
+
+Responsibilities:
+
+- Audit report generation
+- Filtering
+- Search capabilities
+- Export capabilities
+
+Reports may be exposed through:
+
+- DigiWeb
+- DigiConsole
+- Future administrative consoles
+
+---
+
+# 6. Audit Event Flow
+
+## Event Creation
+
+```text
+User Action
       │
       ▼
 Application
-(DigiWeb / DigiConsole)
       │
       ▼
+Audit gRPC API
+```
+
+Example:
+
+```text
+User accesses a dictation
+```
+
+Application generates:
+
+```text
+DICTATION_ACCESSED
+```
+
+---
+
+## Event Processing
+
+```text
 Audit gRPC API
       │
       ▼
@@ -222,263 +308,284 @@ Audit Service
       │
       ▼
 Internal Queue
+```
+
+Validation occurs before persistence.
+
+Invalid events may be rejected.
+
+---
+
+## Event Persistence
+
+```text
+Internal Queue
       │
       ▼
-Audit Processing Worker
+Cosmos DB
+```
+
+A single document is created for each audit event.
+
+No duplicate persistence process exists.
+
+---
+
+## Report Generation
+
+```text
+Report Request
       │
-      ├── Azure Blob Storage
+      ▼
+Reporting API
       │
-      └── SQL Index
+      ▼
+Cosmos DB Query
+      │
+      ▼
+Audit Report
 ```
 
 ---
 
-### Étape 1 - Génération de l'événement
+# 7. Audit Data Model
 
-Une action métier se produit dans une application.
+The platform uses a lightweight audit structure.
 
-Exemples :
-
-- Connexion utilisateur
-- Consultation d'une dictée
-- Modification d'une transcription
-- Exécution d'un rapport
-- Purge d'un enregistrement audio
-
-L'application construit un objet AuditEvent conforme au modèle d'audit standard.
-
-Exemple :
+## Canonical Event
 
 ```json
 {
-  "eventType": "DictationViewed",
-  "category": "Dictation",
-  "userId": "123",
-  "entityType": "Dictation",
-  "entityId": "D-100345"
+  "id": "GUID",
+  "ts": "2026-09-23T15:30:22Z",
+  "tenantId": "TENANT001",
+  "app": "DigiWeb",
+  "event": "DICTATION_ACCESSED",
+  "userId": "USR123",
+  "targetId": "DICT456",
+  "data": {}
 }
 ```
 
 ---
 
-### Étape 2 - Publication via Audit gRPC API
+## Required Fields
 
-L'application transmet l'événement à la plateforme d'audit via l'API gRPC.
-
-Responsabilités :
-
-- Authentifier l'application émettrice
-- Recevoir l'événement
-- Valider le format minimal
-- Retourner rapidement une confirmation de réception
-
-L'appel doit être rapide et ne pas dépendre des mécanismes de stockage.
+```text
+id
+ts
+tenantId
+app
+event
+userId
+```
 
 ---
 
-### Étape 3 - Validation et enrichissement
+## Optional Fields
 
-L'Audit Service enrichit l'événement avec les métadonnées requises.
-
-Exemples :
-
-- AuditEventId
-- TimestampUtc
-- Application
-- CorrelationId
-- SessionId
-- CreatedBySystem
-
-L'événement devient alors prêt à être persisté.
+```text
+targetId
+data
+```
 
 ---
 
-### Étape 4 - Mise en file d'attente
+# 8. Supported Audit Events
 
-L'événement est placé dans une file interne de traitement.
+Version 1 supports the following events:
 
-Objectifs :
+```text
+LOGIN
+LOGOUT
 
-- Découpler les applications du stockage
-- Éviter qu'un ralentissement du stockage impacte les utilisateurs
-- Permettre les mécanismes de reprise et de réessai
+DICTATION_ACCESSED
+DICTATION_STATUS_CHANGED
+DICTATION_PURGED
 
-Une fois l'événement placé dans la file, l'application peut poursuivre son exécution normalement.
+TRANSCRIPTION_MODIFIED
+TRANSCRIPTION_STATUS_CHANGED
 
----
+WORK_SESSION
 
-### Étape 5 - Traitement asynchrone
+REPORT_EXECUTED
+```
 
-Un ou plusieurs Audit Processing Workers récupèrent les événements depuis la file.
+The event catalog is intentionally minimal.
 
-Responsabilités :
-
-- Générer l'identifiant unique AuditEventId
-- Écrire l'événement complet dans Azure Blob Storage
-- Créer l'entrée correspondante dans l'index SQL
-- Vérifier la cohérence de la relation entre les deux mécanismes de stockage
-
----
-
-### Étape 6 - Persistance
-
-Chaque événement produit deux artefacts :
-
-#### Événement complet
-
-Stocké dans Azure Blob Storage.
-
-Contient :
-
-- Toutes les données de l'événement
-- Les détails complets
-- Les métadonnées enrichies
-
-Azure Blob Storage constitue la source officielle de conservation.
+Only events required to satisfy customer reporting requirements are included.
 
 ---
 
-#### Index opérationnel
+# 9. Security Model
 
-Stocké dans SQL.
+## Application Authentication
 
-Contient uniquement les données nécessaires aux :
+Applications authenticate with the Audit Platform.
 
-- Recherches
-- Rapports
-- Filtres
+Examples:
 
-Exemples :
+```text
+DigiWeb
+DigiConsole
+Future Applications
+```
 
-- TimestampUtc
-- Category
-- EventType
-- UserId
-- EntityType
-- EntityId
-- Outcome
-- Severity
-- BlobPath
+Users do not authenticate directly to the Audit Platform.
 
 ---
 
-### Gestion des erreurs
+## Authorization
 
-#### Blob indisponible
+Only trusted applications are authorized to submit audit events.
 
-L'événement demeure dans la file de traitement.
-
-Une nouvelle tentative est effectuée ultérieurement.
+The Audit Service validates caller permissions before accepting requests.
 
 ---
 
-#### SQL indisponible
+## Tenant Isolation
 
-L'événement demeure dans la file de traitement.
+All audit events contain:
 
-Une nouvelle tentative est effectuée ultérieurement.
+```text
+tenantId
+```
 
----
-
-#### Échec de cohérence
-
-Si l'un des deux artefacts est créé mais pas l'autre :
-
-- L'événement est considéré comme incomplet
-- Une alerte est générée
-- Une procédure de reprise est exécutée
+Reports and queries must be restricted to the authorized tenant context.
 
 ---
 
-### Principe fondamental
+# 10. Scalability
 
-Un événement d'audit est considéré valide uniquement lorsque :
+The platform is designed to scale horizontally.
 
-- Le Blob existe
-- L'index SQL existe
-- Les deux partagent le même AuditEventId
+Scaling dimensions include:
 
-La cohérence entre ces deux systèmes constitue une exigence critique de l'architecture.
-
----
-
-### Disponibilité des applications
-
-L'indisponibilité de la plateforme d'audit ne doit jamais empêcher une opération métier.
-
-Exemples :
-
-- Ouverture d'une dictée
-- Modification d'une transcription
-- Connexion utilisateur
-
-La plateforme d'audit doit être conçue pour minimiser tout impact sur les applications consommatrices.
+- Number of applications
+- Number of tenants
+- Event volume
+- Report volume
 
 ---
 
-### Monitoring
+## Cosmos DB Partition Strategy
 
-Les indicateurs suivants doivent être surveillés :
+Recommended partition key:
 
-- Nombre d'événements reçus
-- Nombre d'événements archivés
-- Nombre d'événements en erreur
-- Événements sans Blob
-- Événements sans index SQL
-- Temps moyen de traitement
-- Taille de la file d'attente
+```text
+tenantId
+```
 
-Des alertes doivent être générées lorsqu'une incohérence est détectée.
+Benefits:
 
-## Recovery Strategy
+- Logical tenant isolation
+- Efficient tenant-specific queries
+- Better scalability
+- Predictable throughput consumption
 
-Azure Blob Storage constitue la source officielle des événements.
+---
 
-En cas de perte ou corruption de l'index SQL, celui-ci peut être reconstruit à partir des événements archivés.
+# 11. Availability and Reliability
 
-Cette approche réduit la dépendance à l'index SQL et améliore la résilience de la plateforme.
+The architecture favors reliability through:
 
-## Non Functional Requirements
+- Asynchronous processing
+- Internal queue buffering
+- Retry capabilities
+- Decoupled services
 
-### Scalability
+Failures in audit persistence must not interrupt business operations.
 
-La plateforme doit supporter l'ajout de nouvelles applications sans modification majeure de l'architecture.
+---
 
-### Availability
+# 12. Reporting Architecture
 
-L'indisponibilité temporaire de la plateforme d'audit ne doit pas empêcher les opérations métier.
+Version 1 supports:
 
-### Maintainability
+- Access Audit Report
+- Detailed Transcription Report
+- Dictation Status History Report
+- User Activity Audit Report
+- Time Analysis Report
+- True Productivity Report
 
-Toutes les applications utilisent le modèle AuditEvent standard.
+All reports are generated directly from Cosmos DB.
 
-### Performance
+---
 
-La publication d'un événement d'audit ne doit pas avoir d'impact perceptible sur l'expérience utilisateur.
+# 13. Future Evolution
 
-## Vision long terme
+The architecture is intentionally designed to evolve.
 
-Le système d'audit doit être conçu comme une plateforme centralisée pouvant être utilisée par plusieurs applications.
+Future enhancements may include:
 
-Applications ciblées :
+## Additional Audit Events
 
-- DigiWeb
-- DigiConsole
-- Applications futures
+Examples:
 
-Chaque application publie des événements conformes au modèle AuditEvent.
+```text
+USER_CREATED
+ROLE_CHANGED
+PERMISSION_CHANGED
+AUDIO_ACCESSED
+REPORT_EXPORTED
+```
 
-L'Audit Platform assure :
+---
 
-- La réception des événements
-- La validation
-- L'archivage
-- L'indexation
-- L'exposition aux rapports
-- L'alimentation future de Microsoft Fabric
+## Microsoft Fabric Integration
 
-Microsoft Fabric n'est pas requis pour la phase 1.
+Potential future capabilities:
 
-La plateforme d'audit doit toutefois être conçue de manière à permettre une future exploitation des événements d'audit stockés dans Azure Blob Storage.
+- Historical analytics
+- Enterprise dashboards
+- Operational KPIs
+- Trend analysis
+- Cross-application reporting
+- Executive reporting
 
-Azure Blob Storage constitue ainsi la source officielle des événements et la future source de données analytiques utilisée par Microsoft Fabric.
+Microsoft Fabric is not required for Version 1.
+
+---
+
+## Long-Term Retention Strategy
+
+A future archival strategy may be introduced if:
+
+- Audit volume significantly increases
+- Storage costs justify optimization
+- Regulatory requirements evolve
+
+The initial architecture stores all audit events exclusively in Cosmos DB.
+
+---
+
+# 14. Architecture Decisions
+
+| Decision | Result |
+|-----------|---------|
+| Audit platform model | Centralized |
+| Communication protocol | gRPC |
+| Processing model | Asynchronous |
+| Source of truth | Azure Cosmos DB |
+| Multi-tenant support | Yes |
+| Event model | Minimalist |
+| Reporting source | Cosmos DB |
+| Microsoft Fabric required for V1 | No |
+| Direct database access from applications | Not allowed |
+
+---
+
+# 15. Summary
+
+The DigiWeb Audit Platform architecture provides:
+
+- A centralized audit service
+- A lightweight event model
+- Azure Cosmos DB as the single source of truth
+- Multi-tenant support
+- Asynchronous processing
+- Support for customer-required audit reports
+- Future compatibility with DigiConsole and additional applications
+
+The architecture intentionally prioritizes simplicity, maintainability, and business value while remaining extensible for future analytics and reporting requirements.
