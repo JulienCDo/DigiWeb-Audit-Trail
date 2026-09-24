@@ -1,116 +1,312 @@
-# DigiWeb Audit Trail
+# DigiWeb Audit Platform
 
-## Master Document
-
-👉 [DigiWeb Audit Master Roadmap](./DigiWeb-Audit-Master-Roadmap.md)
-
-# Statut du projet
-
-**Phase actuelle : Conception**
-
-### Avancement
-
-| Domaine | Statut |
-|----------|----------|
-| Exigences métier | ✅ Terminé |
-| Modèle de données | ✅ Terminé |
-| Catalogue des événements | ✅ Terminé |
-| Matrice de couverture | ✅ Terminé |
-| Priorisation | ✅ Terminé |
-| Spécifications des rapports | ✅ Terminé |
-| Architecture | 🔄 En cours |
-| Politique de rétention | ⏳ À faire |
-| Analyse des risques techniques | ⏳ À faire |
-| Développement | ⏳ À venir |
-| Microsoft Fabric (Phase 2) | 📌 Futur |
+Centralized audit and reporting platform for DigiWeb, DigiConsole, and future applications.
 
 ---
 
-## Documents de référence
+# Overview
 
-### Analyse fonctionnelle
+The DigiWeb Audit Platform provides a centralized, multi-tenant audit solution designed to:
 
-- [DigiWeb-Audit-Master-Roadmap](./DigiWeb-Audit-Master-Roadmap.md)
-- [DigiWeb-Audit-Trail-and-Reporting-Requirements](./DigiWeb-Audit-Trail-and-Reporting-Requirements.md)
-- [DigiWeb-Audit-Data-Model](./DigiWeb-Audit-Data-Model.md)
-- [DigiWeb-Audit-Event-Catalog](./DigiWeb-Audit-Event-Catalog.md)
-- [DigiWeb-Audit-Coverage-Matrix](./DigiWeb-Audit-Coverage-Matrix.md)
-- [DigiWeb-Audit-Prioritization](./DigiWeb-Audit-Prioritization.md)
-- [DigiWeb-Audit-Reports-Specifications](./DigiWeb-Audit-Reports-Specifications.md)
+- Track user activity
+- Support customer audit requirements
+- Enable compliance investigations
+- Provide operational reporting
+- Support future cross-application auditing
+- Minimize storage and operational complexity
 
-### Architecture
+The platform uses:
 
-- [DigiWeb-Audit-Trail-Architecture](./DigiWeb-Audit-Trail-Architecture.md)
-
----
-
-## Objectif du projet
-
-Mettre en place un système d'audit centralisé dans DigiWeb/Synnefo permettant :
-
-- La traçabilité complète des actions utilisateur et système
-- La production de rapports d'audit conformes aux exigences client
-- L'investigation des incidents et des accès
-- Le suivi opérationnel et la productivité
-- La préparation de l'intégration Microsoft Fabric pour l'analytique avancée
+- gRPC for communication
+- Asynchronous event processing
+- Azure Cosmos DB as the single source of truth
+- A lightweight business-oriented audit model
 
 ---
 
-## Couverture du RFP
+# Architecture
 
-### Audit Reports
+```text
+Applications
+├── DigiWeb
+├── DigiConsole
+└── Future Applications
 
-| Exigence | Couverture |
+        │
+        ▼
+
+Audit gRPC API
+
+        │
+        ▼
+
+Audit Service
+
+        │
+        ▼
+
+Internal Queue
+
+        │
+        ▼
+
+Azure Cosmos DB
+(Source of Truth)
+
+        │
+        ▼
+
+Reporting APIs
+
+        │
+        ▼
+
+Audit Reports
+```
+
+---
+
+# Key Architectural Decisions
+
+| Decision | Selection |
 |-----------|-----------|
-| Liste des utilisateurs ayant accédé à une dictée | ✅ |
-| Utilisateurs ayant modifié une transcription | ✅ |
-| Temps passé à transcrire par tous les transcriptionnistes | ✅ |
-| Mesures réelles de productivité | ✅ |
-| Variables d'audit additionnelles | ✅ |
-
-### User Activity Audit
-
-| Exigence | Couverture |
-|-----------|-----------|
-| Connexion / Déconnexion utilisateur | ✅ |
-| Changement de statut d'une dictée | ✅ |
-| Changement de statut d'une transcription | ✅ |
-| Purge des enregistrements audio | ✅ |
-| Exécution de rapports | ✅ |
-| Activités additionnelles | ✅ |
+| Audit Platform | Centralized |
+| Communication | gRPC |
+| Processing | Asynchronous |
+| Storage | Azure Cosmos DB |
+| Source of Truth | Cosmos DB |
+| Multi-Tenant Support | Yes |
+| Reporting Source | Cosmos DB |
+| Microsoft Fabric | Future Phase |
+| Direct Database Access | Not Allowed |
 
 ---
 
-## Travaux terminés
+# Audit Event Catalog
 
-- [x] Définir les exigences d'audit
-- [x] Définir le modèle d'audit central
-- [x] Créer le catalogue des événements
-- [x] Cartographier la couverture fonctionnelle
-- [x] Prioriser les exigences
-- [x] Spécifier les rapports d'audit
+Version 1 intentionally contains only the events required to satisfy customer requirements.
 
----
+```text
+LOGIN
+LOGOUT
 
-## Travaux en cours
+DICTATION_ACCESSED
+DICTATION_STATUS_CHANGED
+DICTATION_PURGED
 
-📍 Audit Trail Architecture
+TRANSCRIPTION_MODIFIED
+TRANSCRIPTION_STATUS_CHANGED
 
-Objectifs :
+WORK_SESSION
 
-- Définir le Audit Service
-- Définir le stockage des événements
-- Définir la stratégie d'indexation
-- Définir les mécanismes de recherche
-- Définir les API de consultation
-- Définir les impacts de performance
+REPORT_EXECUTED
+```
 
 ---
 
-## Travaux à venir
+# Audit Reports
 
-- [ ] Définir la politique de rétention
-- [ ] Identifier les risques techniques
-- [ ] Estimer les impacts de performance
-- [ ] Préparer l'implémentation
-- [ ] Définir la stratégie Microsoft Fabric
+Version 1 supports:
+
+- Access Audit Report
+- Detailed Transcription Report
+- Dictation Status History Report
+- User Activity Audit Report
+- Time Analysis Report
+- True Productivity Report
+- Report Usage Report
+
+---
+
+# Document Structure
+
+## Master Planning
+
+### DigiWeb-Audit-Master-Roadmap.md
+
+Primary planning document.
+
+Contains:
+
+- Project vision
+- Architecture roadmap
+- Delivery phases
+- MVP scope
+- Future evolution strategy
+
+---
+
+## Requirements
+
+### DigiWeb-Audit-Trail-and-Reporting-Requirements.md
+
+Defines:
+
+- Customer requirements
+- Audit objectives
+- Reporting requirements
+- Compliance expectations
+- Success criteria
+
+---
+
+## Architecture
+
+### DigiWeb-Audit-Trail-Architecture.md
+
+Defines:
+
+- Target architecture
+- System components
+- Event flow
+- Security model
+- Multi-tenant strategy
+- Scalability considerations
+
+---
+
+## Data Model
+
+### DigiWeb-Audit-Data-Model.md
+
+Defines:
+
+- Canonical audit event structure
+- Required fields
+- Optional fields
+- Multi-tenant design
+- Cosmos DB data model
+
+---
+
+## Event Catalog
+
+### DigiWeb-Audit-Event-Catalog.md
+
+Defines:
+
+- Supported audit events
+- Event purposes
+- Event examples
+- Customer requirement mapping
+
+---
+
+## Coverage Analysis
+
+### DigiWeb-Audit-Coverage-Matrix.md
+
+Defines:
+
+- Functional coverage
+- Event coverage
+- Report coverage
+- Gap analysis
+- Requirement traceability
+
+---
+
+## Prioritization
+
+### DigiWeb-Audit-Prioritization.md
+
+Defines:
+
+- Delivery priorities
+- MVP scope
+- Future phases
+- Implementation strategy
+
+---
+
+## Reporting Specifications
+
+### DigiWeb-Audit-Reports-Specifications.md
+
+Defines:
+
+- Supported audit reports
+- Filters
+- Report columns
+- Data sources
+- Business questions answered
+
+---
+
+# Current Status
+
+## Analysis
+
+- [x] Customer requirements analyzed
+- [x] Audit scope defined
+- [x] Report inventory completed
+
+## Architecture
+
+- [x] Architecture defined
+- [x] Storage strategy defined
+- [x] Event catalog simplified
+- [x] Multi-tenant approach validated
+- [x] Cosmos DB selected as source of truth
+
+## Design
+
+- [x] Data model completed
+- [x] Coverage matrix completed
+- [x] Prioritization completed
+- [x] Report specifications completed
+
+## Next Phase
+
+- [ ] Detailed technical design
+- [ ] gRPC contract definition
+- [ ] Cosmos DB container design
+- [ ] Development planning
+- [ ] MVP implementation
+
+---
+
+# MVP Success Criteria
+
+Version 1 is considered successful when the platform can reliably answer the following questions:
+
+1. Who logged in?
+2. Who logged out?
+3. Who accessed a dictation?
+4. Who modified a transcription?
+5. Who changed a dictation status?
+6. Who changed a transcription status?
+7. How much time was spent transcribing?
+8. Who purged a dictation recording?
+9. Who executed a report?
+
+---
+
+# Future Evolution
+
+Potential future enhancements include:
+
+- Microsoft Fabric integration
+- Advanced analytics
+- Cross-application reporting
+- Security administration auditing
+- Audio access auditing
+- AI usage auditing
+- Long-term archival strategy
+
+These capabilities are intentionally outside the Version 1 scope.
+
+---
+
+# Summary
+
+The DigiWeb Audit Platform delivers a centralized and reusable audit solution built around:
+
+- A lightweight event model
+- Azure Cosmos DB
+- Multi-tenant support
+- gRPC integration
+- Asynchronous processing
+- Customer-focused reporting
+
+The current architecture prioritizes simplicity, maintainability, scalability, and rapid delivery while keeping a clear path for future growth.
