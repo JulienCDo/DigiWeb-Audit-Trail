@@ -20,9 +20,7 @@ The audit trail is the official transactional source for audit data. Microsoft F
 
 The MVP covers the following applications:
 
-- DigiWeb;
-- DigiConsole;
-- future applications approved for integration.
+- DigiWeb only;
 
 All applications must publish audit events through the centralized Audit Service.
 
@@ -63,7 +61,7 @@ Each event must use the canonical event model defined in [`02-event-model.md`](.
 
 ### FR-001 — Centralized event ingestion
 
-The system must provide a centralized Audit Service for receiving events from DigiWeb, DigiConsole, and approved future applications.
+The system must provide a centralized Audit Service for receiving events from DigiWeb.
 
 ### FR-002 — Application authentication
 
@@ -118,27 +116,19 @@ Once accepted, an audit event must not be modified or deleted through normal app
 
 Any correction or additional context must be represented by a new event.
 
-### FR-008 — Idempotency
-
-The Audit Service must support idempotent event submission.
-
-If the same event is submitted more than once, the service must not create duplicate audit records.
-
-The event identifier must be used as the idempotency key.
-
-### FR-009 — Correlation
+### FR-008 — Correlation
 
 Events belonging to the same business operation must support correlation through a shared correlation identifier.
 
 This allows investigators to reconstruct a complete workflow across services.
 
-### FR-010 — Event ordering
+### FR-009 — Event ordering
 
 The system must preserve the event timestamp supplied by the originating application and provide a deterministic ordering strategy for events with identical timestamps.
 
 The storage sequence must not replace the original business event timestamp.
 
-### FR-011 — Event search
+### FR-010 — Event search
 
 Authorized consumers must be able to search audit events using supported filters, including:
 
@@ -147,15 +137,13 @@ Authorized consumers must be able to search audit events using supported filters
 - event type;
 - actor;
 - target entity;
-- application;
-- outcome;
 - correlation identifier.
 
-### FR-012 — Report generation
+### FR-011 — Report generation
 
 The reporting layer must use audit events to generate the reports defined in [`04-reports.md`](./04-reports.md).
 
-### FR-013 — Access control
+### FR-012 — Access control
 
 Audit data and reports must be accessible only to authorized users and services.
 
@@ -166,7 +154,7 @@ Access must be evaluated according to:
 - report permissions;
 - requested data scope.
 
-### FR-014 — Export
+### FR-013 — Export
 
 The reporting layer should support, at minimum:
 
@@ -174,27 +162,6 @@ The reporting layer should support, at minimum:
 - Excel export.
 
 Export functionality must respect the same authorization rules as on-screen report access.
-
-### FR-015 — Failure handling
-
-If an audit event cannot be accepted, the originating application must receive a clear technical response.
-
-The failure must not expose sensitive event data.
-
-The system must provide a reliable retry mechanism for transient failures.
-
-### FR-016 — Audit service observability
-
-The Audit Service must provide operational telemetry for:
-
-- accepted events;
-- rejected events;
-- duplicate events;
-- processing failures;
-- queue depth;
-- processing latency;
-- storage failures;
-- tenant or application identification.
 
 ## 6. Non-functional requirements
 
@@ -278,7 +245,44 @@ The system must provide mechanisms to detect:
 - unsupported event versions;
 - incomplete processing.
 
-## 7. MVP reports
+## 7. Nice To Have
+
+### NTH-001 — Audit service observability
+
+The Audit Service must provide operational telemetry for:
+
+- accepted events;
+- rejected events;
+- duplicate events;
+- processing failures;
+- queue depth;
+- processing latency;
+- storage failures;
+- tenant or application identification.
+
+### NTH-002 — Idempotency
+
+The Audit Service must support idempotent event submission.
+
+If the same event is submitted more than once, the service must not create duplicate audit records.
+
+The event identifier must be used as the idempotency key.
+
+### NTH-003 — Failure handling
+
+If an audit event cannot be accepted, the originating application must receive a clear technical response.
+
+The failure must not expose sensitive event data.
+
+The system must provide a reliable retry mechanism for transient failures.
+
+### NTH-004 — Event ordering
+
+The system must preserve the event timestamp supplied by the originating application and provide a deterministic ordering strategy for events with identical timestamps.
+
+The storage sequence must not replace the original business event timestamp.
+  
+## 8. MVP reports
 
 The MVP reporting layer must support:
 
@@ -381,6 +385,11 @@ The following features are excluded from the MVP:
 - advanced historical analytics;
 - long-term archival implementation;
 - customer-specific retention exceptions.
+- DigiConsole can publish events through the Audit Service;
+- duplicate submissions are handled safely;
+- transient processing failures can be retried;
+- performance impact has been measured and accepted;
+- retention and archival rules have been approved before production deployment.
 
 These features may be considered in future phases.
 
@@ -391,15 +400,10 @@ The MVP is considered functionally complete when:
 - all nine MVP event types are defined;
 - each event has a documented contract;
 - DigiWeb can publish events through the Audit Service;
-- DigiConsole can publish events through the Audit Service;
 - events are validated before storage;
 - events are associated with a tenant;
-- duplicate submissions are handled safely;
 - accepted events are immutable;
 - authorized users can search events;
 - the seven MVP reports can be generated;
 - CSV and Excel exports are available where applicable;
 - tenant isolation has been tested;
-- transient processing failures can be retried;
-- performance impact has been measured and accepted;
-- retention and archival rules have been approved before production deployment.
