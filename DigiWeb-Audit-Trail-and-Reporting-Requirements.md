@@ -1,483 +1,476 @@
-# DigiWeb Audit Reports & User Activity Audit
+# DigiWeb Audit Platform
+# Audit Trail and Reporting Requirements
 
-## Contexte
-
-Afin de répondre aux exigences de traçabilité et d'audit du client, DigiWeb doit offrir des capacités équivalentes ou supérieures à celles actuellement disponibles dans DigiConsole et Med Console.
-
-L'objectif est de permettre aux superviseurs d'accéder à des rapports d'audit détaillés ainsi qu'à un historique complet des activités utilisateurs et système.
-
-> Microsoft Fabric pourra être envisagé comme une phase 2 pour l'analytique avancée, les tableaux de bord et l'historisation long terme.
->
-> L'audit transactionnel doit demeurer la source officielle dans la plateforme DigiWeb/Synnefo.
+Phase: Architecture
 
 ---
 
-# Objectifs fonctionnels
+# 1. Purpose
 
-Le système d'audit DigiWeb doit permettre :
+This document defines the audit trail and reporting requirements for the DigiWeb Audit Platform.
 
-- De retracer toutes les actions utilisateur significatives
-- De reconstruire l'historique complet d'une dictée
-- De reconstruire l'historique complet d'une transcription
-- D'identifier les utilisateurs impliqués dans un processus
-- De mesurer les performances et la productivité
-- De répondre aux exigences de conformité et d'audit du client
-- D'offrir des rapports d'audit exportables
-- De fournir une source fiable de traçabilité pour les enquêtes et vérifications réglementaires
+The objective is to establish a centralized audit capability that:
+
+- Supports customer audit requirements
+- Provides traceability of user activity
+- Supports compliance investigations
+- Enables operational reporting
+- Provides a reusable audit platform for DigiWeb, DigiConsole, and future applications
+
+The audit solution is designed to balance compliance requirements, business value, and storage efficiency.
 
 ---
 
-# Audit Reports
+# 2. Scope
 
-## AR-001 - Liste des utilisateurs ayant accédé à une dictée
+The audit platform applies to:
 
-### Description
+- DigiWeb
+- DigiConsole
+- Future applications integrated with the centralized Audit Platform
 
-Permet d'identifier tous les utilisateurs ayant consulté une dictée donnée.
+The platform records only meaningful business and security events required for reporting, audits, and investigations.
 
-### Données enregistrées
+Low-value technical events are intentionally excluded.
 
-- DictationId
-- UserId
-- UserName
-- UserRole
-- Date/Heure
-- Action (Open/View)
-- Poste de travail (si disponible)
-- Adresse IP (si autorisée par les politiques du client)
+---
 
-### Rapport DigiWeb
+# 3. Business Requirements
+
+The customer requires the ability to audit user activity and system activity through reports similar to those currently available in Digi and Med Console.
+
+Supervisors must be able to generate audit reports that answer key operational, security, and compliance questions.
+
+---
+
+# 4. Audit Objectives
+
+The platform must provide the ability to determine:
+
+- Who logged into the system
+- Who logged out of the system
+- Who accessed a dictation
+- Who modified a transcription
+- Who changed a dictation status
+- Who changed a transcription status
+- Who permanently removed a dictation recording
+- Who executed a report
+- How much time users spent transcribing
+- Productivity metrics based on actual transcription work
+
+---
+
+# 5. User Activity Audit Requirements
+
+The platform must record and retain audit information for the following activities.
+
+## Authentication Activity
+
+The platform must record:
+
+- User login
+- User logout
+
+---
+
+## Dictation Activity
+
+The platform must record:
+
+- Access to a dictation
+- Changes to dictation status
+- Permanent purge of a dictation recording
+
+---
+
+## Transcription Activity
+
+The platform must record:
+
+- Modification of a transcription
+- Changes to transcription status
+- Time spent working on a transcription
+
+---
+
+## Reporting Activity
+
+The platform must record:
+
+- Execution of reports
+
+---
+
+# 6. Audit Event Requirements
+
+Version 1 of the audit platform shall support the following events.
+
+---
+
+## LOGIN
+
+Records successful user authentication.
+
+### Purpose
+
+Supports:
+
+- User Activity Audit
+- Security investigations
+
+---
+
+## LOGOUT
+
+Records user sign-out activity.
+
+### Purpose
+
+Supports:
+
+- User Activity Audit
+- Session tracking
+
+---
+
+## DICTATION_ACCESSED
+
+Records access to a dictation.
+
+### Purpose
+
+Supports:
 
 - Access Audit Report
-
-### Cas d'utilisation
-
-- Enquête de confidentialité
-- Audit clinique
-- Vérification des accès non autorisés
+- Compliance investigations
 
 ---
 
-## AR-002 - Utilisateurs ayant modifié une transcription
+## DICTATION_STATUS_CHANGED
 
-### Description
+Records changes to the workflow status of a dictation.
 
-Permet d'identifier tous les intervenants ayant apporté des modifications à une transcription.
+### Purpose
 
-### Données enregistrées
-
-- TranscriptionId
-- UserId
-- UserName
-- UserRole
-- Date/Heure
-- Type de modification
-- Version
-
-### Actions suivies
-
-- Create
-- Modify
-- Correct
-- Review
-- Approve
-- Sign
-- Reject
-- Return
-
-### Rapport DigiWeb
-
-- Transcription Detailed Report
-
-### Cas d'utilisation
-
-- Contrôle qualité
-- Historique des corrections
-- Vérification des responsabilités
-
----
-
-## AR-003 - Temps passé à transcrire par tous les transcriptionnistes
-
-### Description
-
-Permet de mesurer le temps réellement consacré à une dictée par chacun des intervenants.
-
-### Données enregistrées
-
-- DictationId
-- UserId
-- UserName
-- UserRole
-- StartTime
-- StopTime
-- Duration
-
-### Exemple
-
-- Jane Doe : 18 minutes
-- Bob Martin : 7 minutes
-- John Smith : 4 minutes
-
-### Rapport DigiWeb
-
-- Time Analysis Report
-
-### Cas d'utilisation
-
-- Analyse de productivité
-- Gestion des charges de travail
-- Allocation des ressources
-- Mesure des temps de traitement
-
-### Événements requis
-
-- TranscriptionWorkStarted
-- TranscriptionWorkStopped
-
----
-
-## AR-004 - True Productivity Measures
-
-### Description
-
-Permet de mesurer la productivité réelle des transcriptionnistes.
-
-### Indicateurs requis
-
-- Dictées complétées
-- Documents complétés
-- Temps moyen de transcription
-- Temps moyen de révision
-- Délai moyen de traitement
-- Minutes transcrites par heure
-- Volume traité par utilisateur
-- Productivité par équipe
-- Productivité par site
-
-### Rapport DigiWeb
-
-- True Productivity Report
-
-### Cas d'utilisation
-
-- Évaluation opérationnelle
-- Optimisation des processus
-- Suivi des performances
-- Analyse des tendances
-- Gestion des SLA
-
-### Événements requis
-
-- TranscriptionWorkStarted
-- TranscriptionWorkStopped
-- TranscriptionCreated
-- TranscriptionReviewed
-- TranscriptionApproved
-- DictationStatusChanged
-
----
-
-## AR-005 - Rapports d'audit additionnels
-
-### Historique des statuts de dictée
-
-#### Description
-
-Permet de suivre toutes les transitions de statut d'une dictée.
-
-#### Statuts suivis
-
-- New
-- Reserved
-- Busy
-- Dictating
-- ToTranscribe
-- Completed
-- Archived
-
-#### Informations enregistrées
-
-- Ancien statut
-- Nouveau statut
-- Utilisateur
-- Date/Heure
-
-#### Rapport DigiWeb
+Supports:
 
 - Dictation Status History Report
+- User Activity Audit
 
 ---
 
-### Rapport de sécurité
+## DICTATION_PURGED
 
-#### Événements suivis
+Records permanent deletion of a dictation recording.
 
-- Échecs d'authentification
-- Déconnexions
-- Expiration de session
-- Verrouillage de compte
-- Réinitialisation de mot de passe
-- Modification des permissions
-- Attribution de rôle
-- Retrait de rôle
+### Purpose
 
-#### Rapport DigiWeb
+Supports:
 
-- Security Audit Report
+- Compliance investigations
+- User Activity Audit
 
 ---
 
-### Rapport des accès aux fichiers
+## TRANSCRIPTION_MODIFIED
 
-#### Événements suivis
+Records modification of a transcription.
 
-- Lecture audio
-- Téléchargement audio
-- Export
-- Suppression
-- Purge
+### Purpose
 
-#### Rapport DigiWeb
+Supports:
 
-- File Access Audit Report
+- Detailed Transcription Report
 
 ---
 
-### Rapport d'utilisation de l'assistance IA
+## TRANSCRIPTION_STATUS_CHANGED
 
-#### Événements suivis
+Records changes to the workflow status of a transcription.
 
-- Utilisateur
-- Date/Heure
-- Succès / échec
-- Durée de traitement
+### Purpose
 
-#### Rapport DigiWeb
+Supports:
 
-- AI Usage Audit Report
-
-#### Contraintes
-
-Aucune donnée sensible ou clinique ne doit être enregistrée inutilement.
+- User Activity Audit
+- Workflow reporting
 
 ---
 
-# User Activity Audit
+## WORK_SESSION
 
-## Principe
+Records a completed transcription work session.
 
-Tous les événements d'audit doivent être centralisés dans un service unique afin de faciliter :
+### Purpose
 
-- La traçabilité
-- Les rapports
-- Les enquêtes
-- Les vérifications réglementaires
-- Les analyses opérationnelles
+Supports:
 
----
-
-## UA-001 - Connexion / Déconnexion utilisateur
-
-### Événements enregistrés
-
-- LoginSucceeded
-- LoginFailed
-- Logout
-- SessionExpired
-
-### Informations
-
-- Utilisateur
-- UserRole
-- Date/Heure
-- Application
-- Poste de travail
-- Adresse IP (si disponible)
-
----
-
-## UA-002 - Changement de statut d'une dictée
-
-### Événements enregistrés
-
-- DictationStatusChanged
-
-### Informations
-
-- Ancien statut
-- Nouveau statut
-- Utilisateur
-- Date/Heure
-
-### Statuts concernés
-
-- Reserved
-- Busy
-- Dictating
-- ToTranscribe
-- Completed
-- Archived
-
----
-
-## UA-003 - Changement de statut d'une transcription
-
-### Événements enregistrés
-
-- Draft
-- Editing
-- Reviewed
-- Approved
-- Signed
-- Returned
-- Rejected
-
-### Informations
-
-- Ancien statut
-- Nouveau statut
-- Utilisateur
-- Date/Heure
-
----
-
-## UA-004 - Purge des enregistrements audio
-
-### Événements enregistrés
-
-- Manual Purge
-- Retention Purge
-- System Purge
-
-### Informations
-
-- DictationId
-- Fichier audio
-- Utilisateur
-- Motif
-- Date/Heure
-
----
-
-## UA-005 - Exécution de rapports
-
-### Événements enregistrés
-
-- ReportExecuted
-- ReportExported
-
-### Informations
-
-- Rapport exécuté
-- Paramètres utilisés
-- Utilisateur
-- Date/Heure
-- Durée d'exécution
-
-### Rapports concernés
-
-- Access Audit
-- True Productivity Report
 - Time Analysis Report
-- Transcription Detailed Report
-- Security Audit
-- Rapports personnalisés
+- True Productivity Report
 
 ---
 
-## UA-006 - Activités additionnelles recommandées
+## REPORT_EXECUTED
 
-### Consultation d'une dictée
+Records execution of a report.
 
-- DictationOpened
-- DictationViewed
+### Purpose
 
-### Gestion des verrous
+Supports:
 
-- LockAcquired
-- LockReleased
-- LockDenied
-
-### Activités audio
-
-- PlaybackStarted
-- PlaybackPaused
-- PlaybackStopped
-
-### Reconnaissance vocale
-
-- SpeechStarted
-- SpeechStopped
-- SpeechFailed
-
-### Gestion des permissions
-
-- RoleAssigned
-- RoleRemoved
-- PermissionChanged
-
-### Activités IA
-
-- AIAssistanceRequested
-- AIAssistanceCompleted
-- AIAssistanceFailed
+- User Activity Audit
+- Report Usage Monitoring
 
 ---
 
-# Exigences non fonctionnelles
+# 7. Reporting Requirements
 
-## Performance
-
-L'enregistrement d'un événement d'audit ne doit pas ralentir de manière perceptible les opérations courantes de DigiWeb.
-
-## Intégrité
-
-Les données d'audit doivent être immuables une fois enregistrées.
-
-## Traçabilité
-
-Chaque événement doit être horodaté et associé à un utilisateur ou à un processus système.
-
-## Disponibilité
-
-Les données d'audit doivent rester consultables même en cas d'évolution de l'application.
-
-## Export
-
-Les rapports doivent pouvoir être exportés au minimum en :
-
-- CSV
-- Excel
-
-## Sécurité
-
-L'accès aux rapports doit être contrôlé selon les rôles utilisateur.
-
-## Conservation
-
-Les données d'audit doivent respecter les politiques de rétention définies par le client.
+The platform shall provide audit reports capable of answering the customer's business and compliance questions.
 
 ---
 
-# Recommandation d'architecture
+# 8. Access Audit Report
 
-## Phase 1
+## Objective
 
-Implémenter un Audit Trail centralisé dans la plateforme DigiWeb/Synnefo.
+Determine who accessed a specific dictation.
 
-### Objectifs
+## Questions Answered
 
-- Source officielle des événements
-- Historique complet
-- Rapports opérationnels
-- Conformité et traçabilité
-- Audit transactionnel unifié
+- Who accessed the dictation?
+- When was the dictation accessed?
+- How many users accessed the dictation?
+
+## Required Audit Event
+
+- DICTATION_ACCESSED
 
 ---
 
-## Phase 2 (Optionnelle)
+# 9. Detailed Transcription Report
 
-Intégration Microsoft Fabric pour :
+## Objective
 
-- Conservation historique long terme
+Determine who modified a transcription.
+
+## Questions Answered
+
+- Who modified the transcription?
+- When was it modified?
+- How many modifications occurred?
+
+## Required Audit Event
+
+- TRANSCRIPTION_MODIFIED
+
+---
+
+# 10. Dictation Status History Report
+
+## Objective
+
+Provide a chronological history of dictation workflow changes.
+
+## Questions Answered
+
+- What status changes occurred?
+- Who performed the change?
+- When did the change occur?
+
+## Required Audit Event
+
+- DICTATION_STATUS_CHANGED
+
+---
+
+# 11. User Activity Audit Report
+
+## Objective
+
+Provide a consolidated view of user activity.
+
+## Questions Answered
+
+- Who logged in?
+- Who logged out?
+- Who changed statuses?
+- Who purged recordings?
+- Who executed reports?
+
+## Required Audit Events
+
+- LOGIN
+- LOGOUT
+- DICTATION_STATUS_CHANGED
+- TRANSCRIPTION_STATUS_CHANGED
+- DICTATION_PURGED
+- REPORT_EXECUTED
+
+---
+
+# 12. Time Analysis Report
+
+## Objective
+
+Measure time spent transcribing.
+
+## Questions Answered
+
+- How much time was spent on a dictation?
+- Which transcriptionists worked on the dictation?
+- How much time did each transcriptionist contribute?
+
+## Required Audit Event
+
+- WORK_SESSION
+
+---
+
+# 13. True Productivity Report
+
+## Objective
+
+Measure productive transcription work.
+
+## Questions Answered
+
+- How many productive hours were worked?
+- What productivity metrics can be calculated?
+- How much work was completed during a period?
+
+## Required Audit Event
+
+- WORK_SESSION
+
+---
+
+# 14. Audit Data Requirements
+
+Every audit event must contain sufficient information to answer reporting and investigation questions.
+
+## Required Fields
+
+```text
+id
+ts
+tenantId
+app
+event
+userId
+```
+
+---
+
+## Optional Fields
+
+```text
+targetId
+data
+```
+
+---
+
+# 15. Multi-Tenant Requirements
+
+The audit platform must support multiple tenants.
+
+Requirements:
+
+- Every event belongs to a tenant.
+- Audit queries must respect tenant boundaries.
+- Reports must only expose data for authorized tenants.
+- Tenant data must remain logically isolated.
+
+---
+
+# 16. Performance Requirements
+
+The audit solution must not negatively impact normal application workflows.
+
+Requirements:
+
+- Audit submission must be asynchronous.
+- Audit processing must be non-blocking.
+- Business transactions must not fail due to audit persistence issues.
+- Temporary storage failures must not interrupt user operations.
+
+---
+
+# 17. Security Requirements
+
+Audit events are security-sensitive records.
+
+Requirements:
+
+- Applications must authenticate to the Audit Platform.
+- Direct database access is prohibited.
+- Only the Audit Service may write audit events.
+- Audit events are immutable once stored.
+
+Users do not authenticate directly to the Audit Platform.
+
+---
+
+# 18. Reporting Requirements Summary
+
+| Requirement | Report |
+|------------|---------|
+| Users who accessed a dictation | Access Audit Report |
+| Users who modified transcriptions | Detailed Transcription Report |
+| Dictation status history | Dictation Status History Report |
+| User activity monitoring | User Activity Audit Report |
+| Time spent transcribing | Time Analysis Report |
+| True productivity measurement | True Productivity Report |
+
+---
+
+# 19. Out of Scope (Version 1)
+
+The following capabilities are intentionally excluded from the initial release:
+
+- Audio playback auditing
+- Audio download auditing
+- User administration auditing
+- Role change auditing
+- Permission change auditing
+- AI usage auditing
+- Advanced analytics
+- Cross-application reporting
+- Microsoft Fabric integration
+
+These capabilities may be introduced in future phases if justified by business or compliance requirements.
+
+---
+
+# 20. Success Criteria
+
+The audit platform is considered successful if it can reliably answer the following questions:
+
+1. Who logged in?
+2. Who logged out?
+3. Who accessed a dictation?
+4. Who modified a transcription?
+5. Who changed a dictation status?
+6. Who changed a transcription status?
+7. How much time was spent transcribing?
+8. Who purged a dictation recording?
+9. Who executed a report?
+
+If these questions can be answered accurately through the audit reports, the audit platform satisfies the current customer requirements.
+
+---
+
+# 21. Summary
+
+The DigiWeb Audit Platform provides a lightweight, centralized audit solution focused on business value and compliance requirements.
+
+Version 1 delivers:
+
+- A minimal audit event catalog
+- Multi-tenant support
+- Centralized audit management
+- Audit reporting capabilities
+- Azure Cosmos DB as the source of truth
+- Support for all customer-requested audit scenarios
+
+The solution intentionally prioritizes simplicity, maintainability, and scalability while remaining extensible for future requirements.
