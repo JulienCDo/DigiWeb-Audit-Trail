@@ -4,7 +4,7 @@
 
 This document defines the canonical event model used by the DigiWeb Audit Trail.
 
-All audit events published by DigiWeb, DigiConsole, or approved future applications must comply with this model.
+All audit events published by DigiWeb must comply with this model.
 
 The model is designed to provide:
 
@@ -71,11 +71,11 @@ Example:
 | `eventVersion` | Integer | Yes | Version of the event contract. |
 | `timestampUtc` | DateTime | Yes | Time at which the business action occurred, in UTC. |
 | `tenantId` | String | Yes | Tenant to which the event belongs. |
-| `application` | String | Yes | Application that generated the event, such as `DigiWeb` or `DigiConsole`. |
+| `application` | String | Not for V1 | Application that generated the event, such as `DigiWeb` or `DigiConsole`. |
 | `eventType` | String | Yes | Canonical event name from the event catalog. |
 | `category` | String | Yes | Functional category of the event. |
-| `outcome` | String | Yes | Result of the operation. |
-| `severity` | String | Yes | Business or security importance of the event. |
+| `outcome` | String | No | Result of the operation. |
+| `severity` | String | No | Business or security importance of the event. |
 | `actor` | Object | Yes | User, service, or system responsible for the action. |
 | `target` | Object | No | Business entity affected by the action. |
 | `sessionId` | UUID | No | User session associated with the event. |
@@ -398,7 +398,7 @@ The event must not store sensitive data or unrestricted query payloads.
 The following rules apply to all events:
 
 1. `id` must be a valid UUID.
-2. `id` must be unique within the tenant.
+2. `tenant id` must be unique within the tenant.
 3. `eventVersion` must be a positive integer.
 4. `timestampUtc` must be a valid UTC timestamp.
 5. `tenantId` must be present and must match the authenticated application context.
