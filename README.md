@@ -122,7 +122,7 @@ Version 1 supports:
 
 ## Master Planning
 
-### DigiWeb-Audit-Master-Roadmap.md
+### [DigiWeb-Audit-Master-Roadmap.md](./DigiWeb-Audit-Master-Roadmap.md)
 
 Primary planning document.
 
@@ -138,7 +138,7 @@ Contains:
 
 ## Requirements
 
-### DigiWeb-Audit-Trail-and-Reporting-Requirements.md
+### [DigiWeb-Audit-Trail-and-Reporting-Requirements.md](./DigiWeb-Audit-Trail-and-Reporting-Requirements.md)
 
 Defines:
 
@@ -152,7 +152,7 @@ Defines:
 
 ## Architecture
 
-### DigiWeb-Audit-Trail-Architecture.md
+### [DigiWeb-Audit-Trail-Architecture.md](./DigiWeb-Audit-Trail-Architecture.md)
 
 Defines:
 
@@ -167,7 +167,7 @@ Defines:
 
 ## Data Model
 
-### DigiWeb-Audit-Data-Model.md
+### [DigiWeb-Audit-Data-Model.md](./DigiWeb-Audit-Data-Model.md)
 
 Defines:
 
@@ -181,7 +181,7 @@ Defines:
 
 ## Event Catalog
 
-### DigiWeb-Audit-Event-Catalog.md
+### [DigiWeb-Audit-Event-Catalog.md](./DigiWeb-Audit-Event-Catalog.md)
 
 Defines:
 
@@ -194,7 +194,7 @@ Defines:
 
 ## Coverage Analysis
 
-### DigiWeb-Audit-Coverage-Matrix.md
+### [DigiWeb-Audit-Coverage-Matrix.md](./DigiWeb-Audit-Coverage-Matrix.md)
 
 Defines:
 
@@ -208,7 +208,7 @@ Defines:
 
 ## Prioritization
 
-### DigiWeb-Audit-Prioritization.md
+### [DigiWeb-Audit-Prioritization.md](./DigiWeb-Audit-Prioritization.md)
 
 Defines:
 
@@ -221,7 +221,7 @@ Defines:
 
 ## Reporting Specifications
 
-### DigiWeb-Audit-Reports-Specifications.md
+### [DigiWeb-Audit-Reports-Specifications.md](./DigiWeb-Audit-Reports-Specifications.md)
 
 Defines:
 
