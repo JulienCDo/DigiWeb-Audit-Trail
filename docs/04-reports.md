@@ -379,6 +379,24 @@ Measure the time spent by users working on dictations or transcriptions.
 | Outcome | Session outcome |
 | Application | Originating application |
 
+### Required view: work by dictation
+
+For a selected dictation, the report must list every user who worked on it.
+
+The result must include:
+
+- Dictation ID;
+- Transcription ID, when available;
+- User ID;
+- User name;
+- User role;
+- Work type;
+- Start time;
+- Stop time;
+- Duration;
+- Total duration per user;
+- Total duration for the dictation.
+
 ### Summary values
 
 The report may provide:
