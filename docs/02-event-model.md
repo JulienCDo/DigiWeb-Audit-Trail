@@ -23,13 +23,9 @@ An audit event contains:
 - a unique identifier;
 - a contract version;
 - the event timestamp;
-- the tenant context;
+- the authentication token;
 - the originating application;
 - the event type;
-- the actor;
-- the target entity;
-- the result;
-- optional correlation and session information;
 - event-specific data.
 
 Example:
@@ -39,24 +35,9 @@ Example:
   "id": "8e3a7d7c-9d67-4dc9-a337-cf1d4e44dc5",
   "eventVersion": 1,
   "timestampUtc": "2026-09-23T15:30:22.000Z",
-  "tenantId": "TENANT001",
+  "authenticationToken": ""
   "application": "DigiWeb",
   "eventType": "DICTATION_ACCESSED",
-  "category": "Dictation",
-  "outcome": "SUCCESS",
-  "severity": "INFO",
-  "actor": {
-    "type": "USER",
-    "id": "USR123",
-    "displayName": "Jane Doe",
-    "role": "TRANSCRIPTIONIST"
-  },
-  "target": {
-    "type": "DICTATION",
-    "id": "DICT456"
-  },
-  "sessionId": "4e3a7d7c-9d67-4dc9-a337-cf1d4e44dc5",
-  "correlationId": "7b2a3c4d-5e6f-7890-abcd-ef1234567890",
   "data": {
     "accessType": "VIEW"
   }
@@ -65,6 +46,7 @@ Example:
 
 ## 3. Field definitions
 
+NEED UPDATE !!! 
 | Field | Type | Required | Description |
 |---|---|---:|---|
 | `id` | UUID | Yes | Unique identifier of the audit event. Used as the idempotency key. |
