@@ -1,25 +1,32 @@
 # DigiWeb Audit Trail
 
-Centralized audit system for DigiWeb and DigiConsole.
+Centralized audit platform for DigiWeb, DigiConsole and future Synnefo applications.
 
 The objective is to provide reliable traceability of user and system actions, support audit reporting, and prepare the platform for future compliance and analytics capabilities.
 
-## Status
+---
 
-**Current phase: MVP architecture design**
+# Status
+
+**Current phase: MVP implementation**
 
 | Area | Status |
-|---|---|
+|--------|--------|
 | Functional requirements | ✅ Defined |
 | Event model | ✅ Defined |
 | MVP event catalog | ✅ Defined |
 | MVP reports | ✅ Defined |
-| Technical architecture | 🔄 To be validated |
-| Implementation | ⏳ Planned |
+| Technical architecture | ✅ Validated |
+| Authentication strategy | ✅ Validated |
+| Queue architecture | ✅ Validated |
+| Cosmos DB model | ✅ Validated |
+| Implementation | 🔄 In Progress |
 | Long-term retention | 📌 Future phase |
 | Microsoft Fabric | 📌 Future phase |
 
-## MVP objectives
+---
+
+# MVP Objectives
 
 The MVP must reliably answer the following questions:
 
@@ -32,9 +39,11 @@ The MVP must reliably answer the following questions:
 7. How much time did a user spend working on a dictation?
 8. Which reports were executed?
 
-## MVP scope
+---
 
-The MVP is based on the following events:
+# MVP Scope
+
+The MVP is based on the following audit events:
 
 ```text
 LOGIN
@@ -50,75 +59,143 @@ REPORT_EXECUTED
 
 Events are:
 
-- centralized in a single audit service;
-- associated with a tenant;
+- centralized in a shared audit service;
 - immutable after creation;
+- organization-scoped;
 - available to authorized reporting features;
 - stored in Azure Cosmos DB;
-- published by applications through a gRPC API.
+- published through a gRPC API;
+- processed asynchronously.
 
-## Target architecture
+---
+
+# Target Architecture
 
 ```text
-DigiWeb / DigiConsole
-          │
-          ▼
-     Audit gRPC API
-          │
-          ▼
-      Audit Service
-          │
-          ▼
-     Internal Queue
-          │
-          ▼
-     Azure Cosmos DB
-          │
-          ▼
-   Reporting API / Reports
+Application
+    │
+    ▼
+Audit gRPC API
+    │
+    ▼
+Azure Storage Queue
+    │
+    ▼
+AuditQueueProcessor
+    │
+    ▼
+Azure Cosmos DB
+    │
+    ▼
+Reports
 ```
 
-### Architecture principles
+---
 
-- **Single source of truth**: Azure Cosmos DB.
-- **Centralized publication**: applications do not access the database directly.
-- **Asynchronous processing**: audit recording must not noticeably slow down business operations.
-- **Immutability**: a recorded event cannot be modified.
-- **Multi-tenant isolation**: a tenant can access only its own events.
-- **Contract validation**: events must comply with the defined model and catalog.
-- **Technical traceability**: events support correlation across related operations.
+# Architecture Principles
 
-## Reports
+## Single source of truth
 
-The following reports are defined for the MVP and will be available once the reporting layer is implemented and validated:
+Azure Cosmos DB is the authoritative source of audit data.
 
-- **Access Audit Report**  
-  Users who accessed a dictation.
+## Asynchronous processing
 
-- **Detailed Transcription Report**  
-  History of transcription modifications and status changes.
+Audit publication must not noticeably slow down business operations.
 
-- **Dictation Status History Report**  
-  History of dictation status changes.
+Applications receive acknowledgement once the event is successfully published to the queue.
 
-- **User Activity Audit Report**  
-  History of logins, logouts, and key user actions.
+## Immutability
 
-- **Time Analysis Report**  
-  Work time recorded per user and per dictation.
+Audit events are never modified after creation.
 
-- **True Productivity Report**  
-  Productivity indicators calculated from activity events.
+Any correction produces a new event.
 
-- **Report Usage Report**  
-  History of executed reports.
+## Organization isolation
 
-CSV and Excel exports may be supported by the reporting layer.
+Organizations can access only their own audit data.
 
-## Documentation structure
+Organization isolation is enforced throughout the platform.
+
+## Centralized publication
+
+Applications never write directly to Azure Cosmos DB.
+
+All events are published through the Audit Service.
+
+## Identity extraction
+
+Authentication is validated at the gRPC boundary.
+
+Identity information is extracted from the authentication token:
+
+- OrganizationId
+- GroupId
+- UserId
+
+The authentication token is never:
+
+- stored;
+- queued;
+- logged;
+- persisted.
+
+---
+
+# Identity Model
+
+The platform uses the following identity model:
+
+```text
+OrganizationId
+GroupId
+UserId
+```
+
+OrganizationId is the official partitioning and isolation boundary.
+
+---
+
+# Reports
+
+The following reports are planned for the MVP:
+
+## Access Audit Report
+
+Users who accessed a dictation.
+
+## Detailed Transcription Report
+
+History of transcription modifications and status changes.
+
+## Dictation Status History Report
+
+History of dictation status changes.
+
+## User Activity Audit Report
+
+History of logins, logouts and key user actions.
+
+## Time Analysis Report
+
+Work time recorded per user and per dictation.
+
+## True Productivity Report
+
+Productivity indicators calculated from activity events.
+
+## Report Usage Report
+
+History of executed reports.
+
+CSV and Excel exports may be supported in future iterations.
+
+---
+
+# Documentation Structure
 
 ```text
 README.md
+
 docs/
   01-requirements.md
   02-event-model.md
@@ -128,16 +205,91 @@ docs/
   06-roadmap.md
 ```
 
-### Documents
+---
 
-- [Functional requirements](./docs/01-requirements.md)
-- [Event model](./docs/02-event-model.md)
-- [Event catalog](./docs/03-event-catalog.md)
-- [Report specifications](./docs/04-reports.md)
-- [Technical architecture](./docs/05-architecture.md)
-- [Roadmap](./docs/06-roadmap.md)
+# Documents
 
-## Out of scope for the MVP
+- Functional requirements
+- Event model
+- Event catalog
+- Report specifications
+- Technical architecture
+- Roadmap
+
+---
+
+# MVP Technical Decisions
+
+## Transport
+
+gRPC only.
+
+## Queue
+
+Azure Storage Queue.
+
+## Database
+
+Azure Cosmos DB.
+
+## Cosmos Partition Key
+
+```text
+/organizationId
+```
+
+## Authentication
+
+AuthenticationToken is validated only at the gRPC endpoint.
+
+The token is expanded into:
+
+- OrganizationId
+- GroupId
+- UserId
+
+Only those values continue through the system.
+
+## Queue Contract
+
+The internal queue message contains:
+
+- AuditEventId
+- TimestampUtc
+- OrganizationId
+- GroupId
+- UserId
+- ApplicationId
+- EventType
+- Data
+
+## Response Contract
+
+CreateAuditEventResponse returns only:
+
+```text
+SynnefoAPIStatus
+```
+
+Accepted means:
+
+```text
+Validation succeeded
+AND
+Queue publication succeeded
+```
+
+Accepted does not mean:
+
+```text
+Persisted in Cosmos DB
+```
+
+Persistence remains asynchronous.
+
+---
+
+# Out of Scope
 
 The following capabilities are planned for future versions:
 
@@ -152,32 +304,35 @@ The following capabilities are planned for future versions:
 - anomaly detection;
 - advanced analytics.
 
-## Important rules
+---
 
-### No direct storage access
+# Important Rules
 
-Applications must publish events through the Audit Service. They must never access Azure Cosmos DB directly.
+## No Direct Storage Access
 
-### No unnecessary clinical data
+Applications never access Cosmos DB directly.
 
-Audit events must contain only the information required for traceability and reporting. Clinical content and full transcription content must not be stored in the audit trail.
+## No Clinical Content
 
-### Immutability
+Audit events contain only traceability information.
 
-Events are created once. Any functional correction must produce a new event rather than modify an existing event.
+Clinical data and transcription content must never be stored in the audit trail.
 
-### Versioning
+## Immutability
 
-The event contract must be versioned to allow the system to evolve without breaking existing applications.
+Events are append-only.
 
-## Next steps
+## Versioning
 
-1. Validate the scope of the nine MVP events.
-2. Validate the canonical `AuditEvent` model.
-3. Validate the gRPC contract.
-4. Define Azure Cosmos DB partitioning and indexes.
-5. Define security and tenant-isolation rules.
-6. Implement the Audit Service.
-7. Implement the first reports.
-8. Perform a performance assessment.
-9. Define the long-term retention and archival strategy outside the MVP.
+The event contract must remain versioned to support future evolution.
+
+---
+
+# Current Priorities
+
+1. Implement Cosmos persistence.
+2. Complete queue processing.
+3. Implement idempotency handling.
+4. Add Application Insights observability.
+5. Implement the Access Audit Report.
+6. Validate end-to-end processing.
