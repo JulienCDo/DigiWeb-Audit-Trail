@@ -2,666 +2,501 @@
 
 ## 1. Purpose
 
-This document defines the audit reports supported by the DigiWeb Audit Trail MVP.
+This document defines the reports supported by the DigiWeb Audit Platform MVP.
 
 Each report specifies:
 
 - its business objective;
-- the questions it must answer;
+- the questions it answers;
 - the events it uses;
-- the available filters;
-- the displayed columns;
+- the supported filters;
+- the displayed information;
 - the required permissions;
-- the supported export formats;
-- its acceptance criteria.
+- the available export formats;
+- the acceptance criteria.
 
-All reports must enforce tenant isolation and role-based access control.
+All reports must enforce organization isolation.
 
-## 2. Common report requirements
+---
+
+## 2. Common Report Requirements
 
 All reports must:
 
 - support a date range filter;
-- apply the user's tenant scope automatically;
+- apply OrganizationId filtering automatically;
 - return only authorized data;
-- display timestamps in a consistent timezone;
-- use UTC as the storage and processing standard;
+- display timestamps consistently;
+- use UTC as the storage standard;
 - provide deterministic sorting;
-- support pagination for large result sets;
-- indicate when no data is available;
-- avoid exposing sensitive clinical content;
+- support pagination;
+- clearly indicate when no data exists;
+- avoid exposing sensitive information;
 - support CSV export where applicable;
 - support Excel export where applicable.
 
-### Common filters
+---
+
+## 3. Common Filters
 
 Depending on the report, the following filters may be available:
 
 - date range;
-- tenant;
+- organization;
 - application;
 - user;
-- user role;
-- event outcome;
-- event severity;
+- group;
+- event type;
 - dictation identifier;
 - transcription identifier;
-- report name;
-- site;
-- department.
+- report name.
 
-## 3. Report access roles
+---
 
-The initial MVP roles are:
+## 4. Report Access
+
+Initial MVP access:
 
 | Role | Access |
-|---|---|
-| `SUPERVISOR` | Operational audit reports within the authorized scope |
-| `ADMINISTRATOR` | Security and operational audit reports within the authorized scope |
-| `AUDITOR` | Read-only access to approved audit reports |
-| `SYSTEM` | Service-to-service access only |
-| Other users | No audit report access unless explicitly authorized |
+|--------|--------|
+| SUPERVISOR | Operational reports |
+| ADMINISTRATOR | Operational and audit reports |
+| AUDITOR | Read-only audit reports |
+| SYSTEM | Service-to-service access |
+| Other users | No access unless explicitly granted |
 
-Report access must be evaluated using both the user's role and the user's tenant or organizational scope.
+All report access must remain organization-scoped.
 
-## 4. Access Audit Report
+---
 
-### Objective
+# 5. Access Audit Report
 
-Identify all users who accessed a specific dictation.
+## Objective
 
-### Business question
+Identify all users who accessed a dictation.
+
+## Business Question
 
 > Who accessed this dictation, when, and how?
 
-### Events used
+## Events Used
 
-- `DICTATION_ACCESSED`
+- DICTATION_ACCESSED
 
-### Filters
+## Filters
 
 - date range;
 - dictation identifier;
 - user identifier;
-- user role;
+- group identifier;
 - access type;
-- application;
-- outcome;
-- site;
-- department.
+- application.
 
-### Columns
+## Columns
 
 | Column | Description |
-|---|---|
-| Date/Time | Event timestamp |
+|----------|----------|
+| Timestamp | Event timestamp |
 | Dictation ID | Accessed dictation |
-| User ID | Actor identifier |
-| User name | Actor display name |
-| User role | Role at the time of access |
+| User ID | User identifier |
+| Group ID | Group identifier |
 | Application | Originating application |
-| Access type | `OPEN` or `VIEW` |
-| Outcome | `SUCCESS` or `DENIED` |
-| Workstation | When permitted and available |
-| IP address | When permitted and available |
+| Access Type | OPEN or VIEW |
 
-### Security
-
-- `SUPERVISOR`
-- `ADMINISTRATOR`
-- `AUDITOR`
-
-### Export
+## Exports
 
 - CSV
 - Excel
 
-### Acceptance criteria
+## Acceptance Criteria
 
 The report is accepted when it can:
 
-- list all recorded access events for a dictation;
-- distinguish opening from viewing when available;
-- identify the actor and timestamp;
-- show denied access attempts;
-- prevent access to data from another tenant.
+- list all recorded accesses;
+- identify the user;
+- identify the dictation;
+- distinguish access types;
+- enforce organization isolation.
 
-## 5. Detailed Transcription Report
+---
 
-### Objective
+# 6. Detailed Transcription Report
 
-Provide the history of modifications and status changes for a transcription.
+## Objective
 
-### Business questions
+Provide the history of transcription modifications and status changes.
+
+## Business Questions
 
 > Who modified this transcription?
 
 > How did the transcription status change over time?
 
-### Events used
+## Events Used
 
-- `TRANSCRIPTION_MODIFIED`
-- `TRANSCRIPTION_STATUS_CHANGED`
+- TRANSCRIPTION_MODIFIED
+- TRANSCRIPTION_STATUS_CHANGED
 
-### Filters
+## Filters
 
 - date range;
 - transcription identifier;
 - dictation identifier;
 - user identifier;
-- user role;
-- event type;
-- transcription version;
-- outcome;
-- application.
+- event type.
 
-### Columns
+## Columns
 
 | Column | Description |
-|---|---|
-| Date/Time | Event timestamp |
+|----------|----------|
+| Timestamp | Event timestamp |
 | Transcription ID | Affected transcription |
-| Dictation ID | Related dictation, when available |
-| User ID | Actor identifier |
-| User name | Actor display name |
-| User role | Role at the time of the event |
-| Event type | Modification or status change |
-| Change type | Type of modification |
-| Previous status | Previous transcription status |
-| New status | New transcription status |
-| Version | Resulting transcription version |
-| Outcome | Operation outcome |
+| Dictation ID | Related dictation |
+| User ID | User identifier |
+| Event Type | Modification or Status Change |
+| Version | Resulting version |
+| Change Type | Type of modification |
+| Previous Status | Previous status |
+| New Status | New status |
 | Application | Originating application |
 
-### Security
+## Privacy Rules
 
-- `SUPERVISOR`
-- `ADMINISTRATOR`
-- `AUDITOR`
+The report must never display:
 
-### Export
-
-- CSV
-- Excel
-
-### Privacy rules
-
-The report must not display:
-
-- full transcription content;
+- transcription content;
 - clinical content;
-- authentication data;
-- unrestricted request payloads.
+- authentication information;
+- tokens.
 
-### Acceptance criteria
+## Acceptance Criteria
 
 The report is accepted when it can:
 
-- reconstruct the recorded transcription history;
-- identify each modifying actor;
-- display the resulting version;
-- display status transitions in chronological order;
-- preserve tenant isolation.
+- reconstruct transcription history;
+- identify modifying users;
+- display modification versions;
+- display status transitions;
+- enforce organization isolation.
 
-## 6. Dictation Status History Report
+---
 
-### Objective
+# 7. Dictation Status History Report
+
+## Objective
 
 Provide the complete status history of a dictation.
 
-### Business question
+## Business Question
 
 > How did this dictation move through its lifecycle?
 
-### Events used
+## Events Used
 
-- `DICTATION_STATUS_CHANGED`
+- DICTATION_STATUS_CHANGED
 
-### Filters
+## Filters
 
 - date range;
 - dictation identifier;
 - user identifier;
 - previous status;
-- new status;
-- application;
-- outcome.
+- new status.
 
-### Columns
+## Columns
 
 | Column | Description |
-|---|---|
-| Date/Time | Event timestamp |
-| Dictation ID | Affected dictation |
-| Previous status | Status before the change |
-| New status | Status after the change |
-| User ID | Actor identifier |
-| User name | Actor display name |
-| User role | Role at the time of the event |
-| Change reason | Business reason, when available |
-| Outcome | Operation outcome |
+|----------|----------|
+| Timestamp | Event timestamp |
+| Dictation ID | Dictation identifier |
+| Previous Status | Previous value |
+| New Status | New value |
+| User ID | User identifier |
 | Application | Originating application |
 
-### Security
-
-- `SUPERVISOR`
-- `ADMINISTRATOR`
-- `AUDITOR`
-
-### Export
-
-- CSV
-- Excel
-
-### Acceptance criteria
+## Acceptance Criteria
 
 The report is accepted when it can:
 
-- list all recorded status transitions;
+- list status transitions;
 - display the previous and new status;
-- sort transitions chronologically;
-- identify the actor or system;
-- show only events belonging to the authorized tenant.
+- sort chronologically;
+- identify the responsible user;
+- enforce organization isolation.
 
-## 7. User Activity Audit Report
+---
 
-### Objective
+# 8. User Activity Audit Report
 
-Provide a consolidated view of significant user and system activity.
+## Objective
 
-### Business question
+Provide a consolidated view of user activity.
 
-> What significant actions were performed by a user or system during a given period?
+## Business Question
 
-### Events used
+> What significant actions were performed by a user during a given period?
 
-- `LOGIN`
-- `LOGOUT`
-- `DICTATION_ACCESSED`
-- `DICTATION_STATUS_CHANGED`
-- `DICTATION_PURGED`
-- `TRANSCRIPTION_MODIFIED`
-- `TRANSCRIPTION_STATUS_CHANGED`
-- `WORK_SESSION`
-- `REPORT_EXECUTED`
+## Events Used
 
-### Filters
+- LOGIN
+- LOGOUT
+- DICTATION_ACCESSED
+- DICTATION_STATUS_CHANGED
+- DICTATION_PURGED
+- TRANSCRIPTION_MODIFIED
+- TRANSCRIPTION_STATUS_CHANGED
+- WORK_SESSION
+- REPORT_EXECUTED
+
+## Filters
 
 - date range;
 - user identifier;
-- user role;
+- group identifier;
 - application;
-- event type;
-- category;
-- target type;
-- target identifier;
-- outcome;
-- severity;
-- correlation identifier.
+- event type.
 
-### Columns
+## Columns
 
 | Column | Description |
-|---|---|
-| Date/Time | Event timestamp |
-| Event type | Audit event type |
-| Category | Event category |
-| Actor ID | User, service, or system identifier |
-| Actor name | Actor display name, when available |
-| Actor role | Role, when available |
-| Target type | Affected entity type |
-| Target ID | Affected entity identifier |
-| Outcome | Operation outcome |
-| Severity | Event severity |
+|----------|----------|
+| Timestamp | Event timestamp |
+| Event Type | Audit event |
+| User ID | User identifier |
+| Group ID | Group identifier |
 | Application | Originating application |
-| Correlation ID | Related operation identifier |
+| Event Data | Event-specific data |
 
-### Security
-
-- `SUPERVISOR`
-- `ADMINISTRATOR`
-- `AUDITOR`
-
-### Export
-
-- CSV
-- Excel
-
-### Acceptance criteria
+## Acceptance Criteria
 
 The report is accepted when it can:
 
-- combine the supported MVP event types;
-- filter by user, event type, and date range;
-- identify both user and system activity;
-- preserve the original event timestamp;
-- apply tenant and role restrictions.
+- combine all supported MVP events;
+- filter by user;
+- filter by event type;
+- filter by period;
+- preserve timestamps;
+- enforce organization isolation.
 
-## 8. Time Analysis Report
+---
 
-### Objective
+# 9. Time Analysis Report
 
-Measure the time spent by users working on dictations or transcriptions.
+## Objective
 
-### Business question
+Measure the recorded work time of users.
 
-> How much time did each user spend working on a dictation or transcription?
+## Business Question
 
-### Events used
+> How much time did users spend working on a dictation?
 
-- `WORK_SESSION`
+## Events Used
 
-### Filters
+- WORK_SESSION
+
+## Filters
 
 - date range;
 - user identifier;
-- user role;
 - dictation identifier;
 - transcription identifier;
-- work type;
-- application;
-- site;
-- department.
+- work type.
 
-### Columns
+## Columns
 
 | Column | Description |
-|---|---|
+|----------|----------|
 | Dictation ID | Related dictation |
-| Transcription ID | Related transcription, when available |
-| User ID | Actor identifier |
-| User name | Actor display name |
-| User role | Role at the time of the session |
-| Work type | Transcription, review, or correction |
-| Start time | Beginning of the work session |
-| Stop time | End of the work session |
-| Duration | Duration in seconds or formatted time |
-| Outcome | Session outcome |
+| Transcription ID | Related transcription |
+| User ID | User identifier |
+| Work Type | Type of work |
+| Duration Seconds | Recorded duration |
 | Application | Originating application |
 
-### Required view: work by dictation
-
-For a selected dictation, the report must list every user who worked on it.
-
-The result must include:
-
-- Dictation ID;
-- Transcription ID, when available;
-- User ID;
-- User name;
-- User role;
-- Work type;
-- Start time;
-- Stop time;
-- Duration;
-- Total duration per user;
-- Total duration for the dictation.
-
-### Summary values
+## Summary Values
 
 The report may provide:
 
 - total duration per user;
 - total duration per dictation;
 - total duration per transcription;
-- average session duration;
-- number of sessions;
-- incomplete sessions;
-- duration by work type.
+- average duration;
+- session count.
 
-### Security
+## Rules
 
-- `SUPERVISOR`
-- `ADMINISTRATOR`
-- `AUDITOR`
+- durations must not be negative;
+- only WORK_SESSION events are authoritative;
+- incomplete sessions must be identified.
 
-### Export
-
-- CSV
-- Excel
-
-### Rules
-
-- Durations must not be negative.
-- Incomplete sessions must be clearly identified.
-- The report must not infer work time from unrelated events.
-- Only recorded `WORK_SESSION` events may be used for the official duration.
-
-### Acceptance criteria
+## Acceptance Criteria
 
 The report is accepted when it can:
 
-- calculate duration from valid work session data;
-- identify the user and target entity;
-- distinguish work types;
-- show incomplete or invalid sessions separately;
-- produce consistent totals.
+- calculate durations correctly;
+- identify users;
+- identify work items;
+- identify incomplete sessions;
+- provide consistent totals.
 
-## 9. True Productivity Report
+---
 
-### Objective
+# 10. True Productivity Report
 
-Provide operational productivity indicators based on audit activity.
+## Objective
 
-### Business question
+Provide productivity indicators based on recorded activity.
 
-> What productivity indicators can be calculated from recorded work and business events?
+## Events Used
 
-### Events used
+- WORK_SESSION
+- TRANSCRIPTION_MODIFIED
+- TRANSCRIPTION_STATUS_CHANGED
+- DICTATION_STATUS_CHANGED
 
-- `WORK_SESSION`
-- `TRANSCRIPTION_MODIFIED`
-- `TRANSCRIPTION_STATUS_CHANGED`
-- `DICTATION_STATUS_CHANGED`
-
-### Filters
+## Filters
 
 - date range;
 - user;
-- user role;
-- team;
-- site;
-- department;
-- work type;
+- group;
 - application.
 
-### Indicators
+## Indicators
 
 The report may provide:
 
-- number of completed dictations;
-- number of completed transcriptions;
-- total recorded work time;
+- completed dictations;
+- completed transcriptions;
+- total work time;
 - average work session duration;
-- average processing time;
-- number of transcription modifications;
-- number of reviewed transcriptions;
-- number of approved transcriptions;
-- volume processed per user;
-- productivity by team;
-- productivity by site.
+- transcription modifications;
+- reviewed transcriptions;
+- approved transcriptions.
 
-### Columns
+## Rules
 
-| Column | Description |
-|---|---|
-| User ID | User identifier |
-| User name | User display name |
-| User role | User role |
-| Completed dictations | Number of completed dictations |
-| Completed transcriptions | Number of completed transcriptions |
-| Total work time | Sum of valid work sessions |
-| Average work time | Average duration per work item |
-| Modified transcriptions | Number of modification events |
-| Productivity rate | Calculated operational indicator |
-| Period | Reporting period |
+Calculated values must:
 
-### Security
+- document their source events;
+- document formulas;
+- document assumptions;
+- exclude duplicate events.
 
-- `SUPERVISOR`
-- `ADMINISTRATOR`
-- `AUDITOR`
-
-### Export
-
-- CSV
-- Excel
-
-### Rules
-
-Productivity indicators must be clearly identified as calculated metrics.
-
-The report must document:
-
-- the source events;
-- the calculation period;
-- the calculation formula;
-- how incomplete sessions are handled;
-- how duplicate events are excluded;
-- how missing data affects the result.
-
-The report must not be used as the sole source for employee evaluation without appropriate business validation.
-
-### Acceptance criteria
+## Acceptance Criteria
 
 The report is accepted when it can:
 
-- calculate indicators from documented event types;
-- provide reproducible results for the same input period;
-- exclude duplicate events;
-- identify incomplete or insufficient data;
-- display the calculation period and source definitions.
+- calculate reproducible metrics;
+- identify insufficient data;
+- exclude duplicates;
+- preserve organization isolation.
 
-## 10. Report Usage Report
+---
 
-### Objective
+# 11. Report Usage Report
 
-Identify which reports were executed, by whom, and when.
+## Objective
 
-### Business questions
+Identify which reports were executed and by whom.
+
+## Business Questions
 
 > Which reports are being used?
 
-> Who executed a report and how long did it take?
+> Who executed a report?
 
-### Events used
+## Events Used
 
-- `REPORT_EXECUTED`
+- REPORT_EXECUTED
 
-### Filters
+## Filters
 
 - date range;
 - user identifier;
-- user role;
 - report name;
-- application;
-- outcome;
-- minimum or maximum execution duration.
+- application.
 
-### Columns
+## Columns
 
 | Column | Description |
-|---|---|
-| Date/Time | Event timestamp |
-| Report name | Executed report |
-| User ID | Actor identifier |
-| User name | Actor display name |
-| User role | Role at execution time |
+|----------|----------|
+| Timestamp | Event timestamp |
+| Report Name | Executed report |
+| User ID | User identifier |
 | Application | Originating application |
-| Execution duration | Duration in milliseconds |
-| Outcome | Execution result |
-| Correlation ID | Related execution identifier |
-| Parameter summary | Sanitized summary, when available |
+| Execution Duration | Execution duration in milliseconds |
 
-### Security
-
-- `ADMINISTRATOR`
-- `AUDITOR`
-
-Access for `SUPERVISOR` may be granted according to customer configuration.
-
-### Export
-
-- CSV
-- Excel
-
-### Privacy rules
-
-The report must not display:
-
-- full query payloads;
-- passwords or tokens;
-- clinical content;
-- unrestricted report parameters;
-- data from another tenant.
-
-### Acceptance criteria
+## Acceptance Criteria
 
 The report is accepted when it can:
 
 - list report executions;
-- identify the executing user;
-- display duration and outcome;
-- filter by report name and date range;
-- prevent unauthorized access to execution history.
+- identify executing users;
+- display execution duration;
+- filter by date range;
+- filter by report name;
+- enforce organization isolation.
 
-## 11. Report export behavior
+---
 
-Exports must follow the same authorization rules as interactive reports.
+# 12. Export Behavior
 
-Each export should:
+Exports must:
 
-- apply the active report filters;
-- preserve the selected tenant scope;
+- respect report permissions;
+- respect OrganizationId isolation;
+- preserve active filters;
 - use stable column names;
-- include the export timestamp;
-- use UTC timestamps or clearly state the display timezone;
-- avoid including hidden or unauthorized fields;
-- protect against formula injection in spreadsheet formats.
+- include export timestamps;
+- avoid hidden fields;
+- protect against spreadsheet formula injection.
 
-Export auditing is outside the MVP event catalog. It may be implemented later through a dedicated `REPORT_EXPORTED` event.
+Export auditing is outside MVP scope.
 
-## 12. Pagination and sorting
+---
 
-Reports returning event-level data must support pagination.
+# 13. Pagination and Sorting
 
-The default sort order is:
+Event-based reports must support pagination.
 
-1. `timestampUtc` descending;
-2. event identifier descending as a deterministic tie-breaker.
+Default sorting:
 
-Historical reports requiring chronological reconstruction may use ascending order.
+1. Timestamp descending
+2. Event identifier descending
 
-The API must return enough metadata for clients to continue pagination safely.
+Historical reports may use ascending chronological ordering.
 
-## 13. Empty and incomplete data
+Pagination must support safe continuation.
 
-Reports must distinguish between:
+---
+
+# 14. Empty and Incomplete Data
+
+Reports must distinguish:
 
 - no matching events;
 - incomplete event data;
-- invalid event data;
+- invalid data;
 - unavailable historical data;
 - unauthorized data.
 
-The reporting layer must not silently invent or infer missing audit events.
+The reporting layer must never invent missing audit information.
 
-When calculated values cannot be reliably produced, the report must show the value as unavailable and explain the reason.
+Calculated values must clearly indicate when required data is unavailable.
 
-## 14. MVP report acceptance checklist
+---
+
+# 15. MVP Acceptance Checklist
 
 The reporting layer is considered ready when:
 
 - all seven MVP reports are implemented;
-- each report uses only documented event types;
-- filters are tenant-safe;
-- role-based authorization is enforced;
-- pagination is available for large result sets;
-- CSV export works where applicable;
-- Excel export works where applicable;
+- all reports enforce OrganizationId isolation;
+- authorization is enforced;
+- pagination is available;
+- CSV export is available where applicable;
+- Excel export is available where applicable;
 - timestamps are displayed consistently;
-- reports do not expose clinical content unnecessarily;
-- calculated metrics are reproducible;
 - duplicate events do not inflate totals;
-- empty and incomplete data are clearly handled;
-- report performance has been measured and accepted.
+- incomplete data is handled correctly;
+- report performance is acceptable.
