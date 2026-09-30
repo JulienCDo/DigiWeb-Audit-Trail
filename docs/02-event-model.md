@@ -2,156 +2,215 @@
 
 ## 1. Purpose
 
-This document defines the canonical event model used by the DigiWeb Audit Trail.
+This document defines the canonical event model used by the DigiWeb Audit Platform.
 
-All audit events published by DigiWeb must comply with this model.
+All audit events published by DigiWeb, DigiConsole and future applications must comply with this model.
 
 The model is designed to provide:
 
 - consistent event storage;
 - reliable audit reporting;
-- multi-tenant isolation;
+- organization isolation;
 - event immutability;
-- correlation across business operations;
-- controlled contract evolution;
+- contract versioning;
+- idempotent processing;
 - compatibility with Azure Cosmos DB.
 
-## 2. Canonical event structure
+---
 
-An audit event contains:
+## 2. Design Principles
 
-- a unique identifier;
-- a contract version;
-- the event timestamp;
-- the authentication token;
-- the originating application;
-- the event type;
-- event-specific data.
+### Identity Source of Truth
+
+Identity information is derived exclusively from the validated AuthenticationToken.
+
+The following values are extracted during gRPC request processing:
+
+- OrganizationId
+- GroupId
+- UserId
+
+Clients must never provide those values directly.
+
+The AuthenticationToken is not stored, queued or persisted.
+
+---
+
+### Immutability
+
+Audit events are append-only.
+
+Once accepted, an event is never modified.
+
+Any correction or additional information must be represented by a new event.
+
+---
+
+### Idempotency
+
+Each audit event must have a unique identifier.
+
+The identifier is used as the idempotency key.
+
+Duplicate submissions must not create duplicate audit records.
+
+---
+
+### Organization Isolation
+
+OrganizationId is the primary isolation boundary of the platform.
+
+All audit queries and reports must be organization-scoped.
+
+---
+
+## 3. Canonical Event Structure
+
+The external event contract contains:
+
+- auditEventId
+- eventVersion
+- timestampUtc
+- authenticationToken
+- applicationId
+- eventType
+- data
 
 Example:
 
 ```json
 {
-  "id": "8e3a7d7c-9d67-4dc9-a337-cf1d4e44dc5",
-  "eventVersion": 1,
+  "auditEventId": "8e3a7d7c-9d67-4dc9-a337-cf1d4e44dc5",
+  "eventVersion": "1.0",
   "timestampUtc": "2026-09-23T15:30:22.000Z",
-  "authenticationToken": ""
-  "application": "DigiWeb",
+  "authenticationToken": "token",
+  "applicationId": "DIGI_WEB",
   "eventType": "DICTATION_ACCESSED",
   "data": {
+    "dictationId": "12345",
     "accessType": "VIEW"
   }
 }
 ```
 
-## 3. Field definitions
+---
 
-NEED UPDATE !!! 
-| Field | Type | Required | Description |
-|---|---|---:|---|
-| `id` | UUID | Yes | Unique identifier of the audit event. Used as the idempotency key. |
-| `eventVersion` | Integer | Yes | Version of the event contract. |
-| `timestampUtc` | DateTime | Yes | Time at which the business action occurred, in UTC. |
-| `tenantId` | String | Yes | Tenant to which the event belongs. |
-| `application` | String | Not for V1 | Application that generated the event, such as `DigiWeb` or `DigiConsole`. |
-| `eventType` | String | Yes | Canonical event name from the event catalog. |
-| `category` | String | Yes | Functional category of the event. |
-| `outcome` | String | No | Result of the operation. |
-| `severity` | String | No | Business or security importance of the event. |
-| `actor` | Object | Yes | User, service, or system responsible for the action. |
-| `target` | Object | No | Business entity affected by the action. |
-| `sessionId` | UUID | No | User session associated with the event. |
-| `correlationId` | UUID | No | Identifier used to link events belonging to the same operation. |
-| `data` | JSON object | No | Event-specific information required for reporting or investigation. |
+## 4. Internal Audit Event
 
-## 4. Actor
-
-The `actor` identifies who or what performed the action.
-
-### Actor structure
-
-| Field | Type | Required | Description |
-|---|---|---:|---|
-| `type` | String | Yes | `USER`, `SERVICE`, `SYSTEM`, or `SCHEDULED_PROCESS`. |
-| `id` | String | Yes | Identifier of the user, service, or process. |
-| `displayName` | String | No | Display name. Must not contain unnecessary sensitive information. |
-| `role` | String | No | User role at the time of the event. |
-
-### User actor example
-
-```json
-{
-  "type": "USER",
-  "id": "USR123",
-  "displayName": "Jane Doe",
-  "role": "TRANSCRIPTIONIST"
-}
-```
-
-### System actor example
-
-```json
-{
-  "type": "SYSTEM",
-  "id": "RetentionService",
-  "displayName": "Retention Service"
-}
-```
-
-A system-generated event must use a non-user actor type. It must not use a fake or placeholder user identifier.
-
-## 5. Target
-
-The `target` identifies the business entity affected by the event.
-
-### Target structure
-
-| Field | Type | Required | Description |
-|---|---|---:|---|
-| `type` | String | Yes | Type of the affected entity. |
-| `id` | String | Yes | Identifier of the affected entity. |
+After authentication and validation, the platform produces an internal audit event.
 
 Example:
 
 ```json
 {
-  "type": "TRANSCRIPTION",
-  "id": "TRX789"
+  "auditEventId": "8e3a7d7c-9d67-4dc9-a337-cf1d4e44dc5",
+  "timestampUtc": "2026-09-23T15:30:22.000Z",
+  "organizationId": "6c8cb3a5-022a-4779-89f8-5d2806379b8f",
+  "groupId": "2785c132-7c39-4fe2-b4bd-8550478a17c0",
+  "userId": "0eb2266f-6c91-4dce-a116-17fae7339cf0",
+  "applicationId": "DIGI_WEB",
+  "eventType": "DICTATION_ACCESSED",
+  "data": {
+    "dictationId": "12345",
+    "accessType": "VIEW"
+  }
 }
 ```
 
-Supported target types may include:
+---
+
+## 5. Queue Model
+
+The Azure Storage Queue message contains:
+
+| Field | Type | Required | Description |
+|---------|---------|---------|---------|
+| AuditEventId | Guid | Yes | Unique audit identifier. |
+| TimestampUtc | DateTime | Yes | Business event timestamp. |
+| OrganizationId | Guid | Yes | Organization isolation boundary. |
+| GroupId | Guid | Yes | Group associated with the actor. |
+| UserId | Guid | Yes | User associated with the actor. |
+| ApplicationId | Enum | Yes | Originating application. |
+| EventType | String | Yes | Event catalog value. |
+| Data | Dictionary | No | Event-specific information. |
+
+The queue message never contains AuthenticationToken.
+
+---
+
+## 6. Cosmos Document
+
+Events are persisted in Azure Cosmos DB.
+
+Database:
 
 ```text
-DICTATION
-TRANSCRIPTION
-AUDIO_RECORDING
-REPORT
-USER
-TENANT
+SynnefoAudit
 ```
 
-The target is optional for events such as a login attempt where no business entity is affected.
-
-## 6. Controlled values
-
-### Event categories
-
-The following categories are supported by the MVP:
+Container:
 
 ```text
-Authentication
-Dictation
-Transcription
-Productivity
-Reporting
+AuditEvents
 ```
 
-Additional categories may be added through a versioned catalog update.
+Partition Key:
 
-### Event types
+```text
+/organizationId
+```
 
-The MVP event types are:
+Example document:
+
+```json
+{
+  "id": "8e3a7d7c-9d67-4dc9-a337-cf1d4e44dc5",
+  "timestampUtc": "2026-09-23T15:30:22.000Z",
+  "organizationId": "6c8cb3a5-022a-4779-89f8-5d2806379b8f",
+  "groupId": "2785c132-7c39-4fe2-b4bd-8550478a17c0",
+  "userId": "0eb2266f-6c91-4dce-a116-17fae7339cf0",
+  "app": "DIGI_WEB",
+  "eventType": "DICTATION_ACCESSED",
+  "data": {
+    "dictationId": "12345",
+    "accessType": "VIEW"
+  }
+}
+```
+
+---
+
+## 7. Field Definitions
+
+| Field | Type | Required | Description |
+|---------|---------|---------|---------|
+| id | Guid | Yes | Unique event identifier. |
+| timestampUtc | DateTime | Yes | Business event timestamp in UTC. |
+| organizationId | Guid | Yes | Organization isolation boundary. |
+| groupId | Guid | Yes | Group identifier. |
+| userId | Guid | Yes | User identifier. |
+| app | String | Yes | Application identifier. |
+| eventType | String | Yes | Event catalog value. |
+| data | Object | No | Event-specific information. |
+
+---
+
+## 8. Application Identifiers
+
+Supported applications:
+
+```text
+DIGI_WEB
+DIGI_CONSOLE
+```
+
+Applications are represented by the ApplicationId protobuf enum.
+
+---
+
+## 9. Event Types
+
+Supported event types:
 
 ```text
 LOGIN
@@ -165,212 +224,58 @@ WORK_SESSION
 REPORT_EXECUTED
 ```
 
-Event types must be written exactly as defined in the event catalog.
+EventType is stored as a string.
 
-### Outcomes
+Validation is performed against the centralized event catalog.
 
-```text
-SUCCESS
-FAILURE
-PARTIAL_SUCCESS
-DENIED
-```
+---
 
-Examples:
+## 10. Event Data Rules
 
-- `LOGIN` with outcome `SUCCESS`;
-- `LOGIN` with outcome `FAILURE`;
-- `DICTATION_ACCESSED` with outcome `DENIED`;
-- `REPORT_EXECUTED` with outcome `SUCCESS`.
+The Data object contains only information required for:
 
-### Severities
+- traceability;
+- reporting;
+- investigations.
 
-```text
-INFO
-WARNING
-ERROR
-CRITICAL
-```
-
-Severity must represent the importance of the event, not the technical status of the API request.
-
-### Actor types
-
-```text
-USER
-SERVICE
-SYSTEM
-SCHEDULED_PROCESS
-```
-
-## 7. Event-specific data
-
-The `data` object contains only fields specific to the event type.
-
-It must not contain:
+The following information must never be stored:
 
 - passwords;
-- access tokens;
+- authentication tokens;
 - authentication secrets;
-- complete transcription content;
+- access tokens;
+- clinical content;
+- transcription content;
 - audio content;
-- unnecessary clinical information;
-- complete request or response payloads.
+- unrestricted request payloads;
+- unrestricted response payloads.
 
-### LOGIN
+---
 
-```json
-{
-  "data": {
-    "authenticationMethod": "PASSWORD",
-    "failureReason": "INVALID_CREDENTIALS"
-  }
-}
-```
+## 11. Correlation
 
-`failureReason` is required only when the login fails.
+Events belonging to the same business operation may share a CorrelationId within the Data object.
 
-### LOGOUT
+Example:
 
 ```json
 {
   "data": {
-    "logoutReason": "USER_REQUEST"
+    "correlationId": "3f43c6a0-48ab-4149-95dc-35ef42cf58cd"
   }
 }
 ```
 
-Supported logout reasons may include:
+Correlation identifiers are optional in V1.
 
-```text
-USER_REQUEST
-SESSION_EXPIRED
-ADMINISTRATIVE
-SYSTEM
-```
+---
 
-### DICTATION_ACCESSED
+## 12. Versioning
 
-```json
-{
-  "data": {
-    "accessType": "VIEW"
-  }
-}
-```
+All events must contain an EventVersion.
 
-Supported access types may include:
+The version identifies the external contract version used by the client application.
 
-```text
-OPEN
-VIEW
-```
+Adding optional fields must not break existing producers or consumers.
 
-### DICTATION_STATUS_CHANGED
-
-```json
-{
-  "data": {
-    "previousStatus": "RESERVED",
-    "newStatus": "COMPLETED"
-  }
-}
-```
-
-Both status values are required.
-
-### DICTATION_PURGED
-
-```json
-{
-  "data": {
-    "purgeType": "MANUAL",
-    "reason": "RETENTION_POLICY",
-    "audioRecordingId": "AUD456"
-  }
-}
-```
-
-Supported purge types may include:
-
-```text
-MANUAL
-RETENTION_POLICY
-SYSTEM
-```
-
-### TRANSCRIPTION_MODIFIED
-
-```json
-{
-  "data": {
-    "version": 3,
-    "changeType": "CORRECTION"
-  }
-}
-```
-
-The event must record the resulting transcription version.
-
-Supported change types may include:
-
-```text
-CREATE
-CORRECTION
-CONTENT_UPDATE
-ANNOTATION
-```
-
-### TRANSCRIPTION_STATUS_CHANGED
-
-```json
-{
-  "data": {
-    "previousStatus": "DRAFT",
-    "newStatus": "REVIEWED"
-  }
-}
-```
-
-Both status values are required.
-
-### WORK_SESSION
-
-```json
-{
-  "data": {
-    "action": "START",
-    "workType": "TRANSCRIPTION",
-    "startedAtUtc": "2026-09-23T15:30:22.000Z",
-    "stoppedAtUtc": "2026-09-23T15:48:22.000Z",
-    "durationSeconds": 1080
-  }
-}
-```
-
-Required fields depend on the action:
-
-- `START` requires `startedAtUtc`;
-- `STOP` requires `stoppedAtUtc` and `durationSeconds`;
-- `durationSeconds` must be a non-negative integer.
-
-A work session should use the same `correlationId` for its start and stop events when both events are emitted separately.
-
-### REPORT_EXECUTED
-
-```json
-{
-  "data": {
-    "reportName": "ACCESS_AUDIT",
-    "executionDurationMs": 1523,
-    "parameterSummary": {
-      "dateRange": "2026-09-01/2026-09-23",
-      "dictationId": "DICT456"
-    }
-  }
-}
-```
-
-Report parameters must be minimized and sanitized.
-
-The event must not store sensitive data or unrestricted query payloads.
+Breaking changes require a new contract version.
