@@ -2,17 +2,24 @@
 
 ## 1. Overview
 
-This roadmap defines the phased delivery plan for the DigiWeb Audit Trail MVP and its future evolution.
+This roadmap defines the delivery plan for the DigiWeb Audit Platform MVP and its future evolution.
 
 The roadmap follows a staged approach:
 
-- first, centralize audit event capture and storage;
-- then, support operational reporting and investigations;
-- later, expand to productivity analytics and advanced analytics.
+1. Define and validate the architecture.
+2. Implement reliable event ingestion.
+3. Implement event persistence.
+4. Deliver operational reporting.
+5. Deliver productivity reporting.
+6. Prepare future analytics capabilities.
 
-The MVP focuses on reliability, traceability, and reporting value. It deliberately excludes long-term analytics and advanced data warehousing work.
+The MVP focuses on reliability, traceability, organization isolation and operational reporting.
 
-## 2. MVP goal
+Long-term analytics, Microsoft Fabric and advanced reporting are intentionally excluded from the MVP.
+
+---
+
+## 2. MVP Goal
 
 The MVP must provide enough audit traceability to answer the key operational and compliance questions of DigiWeb and DigiConsole.
 
@@ -20,240 +27,386 @@ The MVP must deliver:
 
 - reliable event collection;
 - centralized storage;
-- tenant isolation;
+- organization isolation;
 - immutable audit records;
-- operational report generation;
-- productivity measurement support;
-- reporting export capabilities.
+- operational reporting;
+- productivity reporting support;
+- CSV and Excel exports;
+- idempotent event processing.
 
-## 3. Phase 1 — Foundation
+---
 
-### Objective
+# 3. Phase 1 — Architecture and Design
 
-Establish the foundation for all future audit features.
+## Objective
 
-### Scope
+Define and validate the audit platform architecture.
 
-- define the canonical event model;
+## Scope
+
+- define requirements;
+- define the event model;
 - define the event catalog;
-- define the gRPC event ingestion contract;
-- define the Audit Service responsibilities;
-- define application authentication and authorization rules;
-- define tenant isolation policies;
-- define idempotency rules;
-- define storage strategy in Azure Cosmos DB;
-- define event validation and rejection handling.
+- define reporting requirements;
+- define the gRPC contract;
+- define authentication strategy;
+- define identity extraction strategy;
+- define Azure Storage Queue architecture;
+- define Azure Cosmos DB architecture;
+- define idempotency behavior;
+- define observability requirements.
 
-### MVP events in Phase 1
+## Deliverables
 
-- `LOGIN`
-- `LOGOUT`
-- `DICTATION_ACCESSED`
-- `DICTATION_STATUS_CHANGED`
-- `DICTATION_PURGED`
-- `TRANSCRIPTION_MODIFIED`
-- `TRANSCRIPTION_STATUS_CHANGED`
-- `WORK_SESSION`
-- `REPORT_EXECUTED`
-
-### Deliverables
-
+- approved requirements;
 - approved event model;
 - approved event catalog;
-- approved gRPC contract;
-- approved storage design;
-- validation rules;
-- initial observability design.
+- approved reporting specifications;
+- approved architecture;
+- approved queue architecture;
+- approved Cosmos DB design.
 
-### Exit criteria
+## Status
 
-The project can move to Phase 2 only when:
+✅ Completed
 
-- the event model is approved;
-- the event catalog is approved;
-- the gRPC contract is approved;
-- the storage strategy is approved;
-- tenant isolation is defined;
-- validation and rejection rules are defined.
+---
 
-## 4. Phase 2 — Core audit operations
+# 4. Phase 2 — Event Ingestion
 
-### Objective
+## Objective
 
-Enable the first operational reporting and investigation capabilities.
+Enable reliable audit event publication.
 
-### Scope
+## Scope
 
-- events are published through the Audit Service;
-- Azure Cosmos DB stores accepted events;
-- reporting layer supports event searches;
-- report generation is available to authorized users;
-- all operations are tenant-aware;
-- report exports are available in CSV and Excel.
+- gRPC ingestion endpoint;
+- request validation;
+- AuthenticationToken validation;
+- OrganizationId extraction;
+- GroupId extraction;
+- UserId extraction;
+- queue publication;
+- SynnefoAPIStatus responses.
 
-### Reports
+## Deliverables
 
-- Access Audit Report
-- Detailed Transcription Report
-- Dictation Status History Report
-- User Activity Audit Report
+- CreateAuditEvent endpoint;
+- validation framework;
+- queue publisher;
+- accepted/rejected responses;
+- Application Insights telemetry.
 
-### Deliverables
-
-- operational reporting APIs;
-- event search functionality;
-- report authorization controls;
-- CSV and Excel exports;
-- performance testing for event ingestion and report generation.
-
-### Exit criteria
+## Exit Criteria
 
 The phase is complete when:
 
-- reports can be generated for authorized users only;
-- event search is stable and tenant-aware;
-- exports are working;
-- performance is acceptable;
-- the audit trail is operational for the approved use cases.
+- applications can publish events;
+- invalid events are rejected;
+- valid events are accepted;
+- accepted events are published to Azure Storage Queue;
+- identity extraction functions correctly.
 
-## 5. Phase 3 — Productivity and analytics support
+## Status
 
-### Objective
+🔄 In Progress
 
-Support operational productivity and time measurement.
+---
 
-### Scope
+# 5. Phase 3 — Persistence
 
-- `WORK_SESSION` events are fully implemented;
-- productivity calculations are standardized;
-- time tracking is validated against operational practices;
-- productivity reports are generated reliably;
-- incomplete or invalid sessions are clearly handled.
+## Objective
 
-### Reports
+Persist accepted events to Azure Cosmos DB.
 
-- Time Analysis Report
-- True Productivity Report
-- Report Usage Report
+## Scope
 
-### Deliverables
+- Azure Cosmos DB implementation;
+- queue processing;
+- document persistence;
+- idempotency handling;
+- duplicate detection;
+- retry handling;
+- queue message deletion.
 
-- validated work session model;
-- productivity calculations;
-- performance metrics;
-- reporting and filtering enhancements;
-- calculated metric governance.
+## Deliverables
 
-### Exit criteria
+- CosmosAuditRepository;
+- AuditQueueProcessor;
+- duplicate detection;
+- Application Insights instrumentation.
 
-This phase is complete when:
+## Exit Criteria
 
-- work session timing is reliable;
-- productivity numbers are reproducible;
-- calculation rules are documented;
-- the reports are accepted by operational stakeholders.
+The phase is complete when:
 
-## 6. Phase 4 — Future extensions
+- queue messages are persisted;
+- events appear in Cosmos DB;
+- duplicate deliveries are detected;
+- HTTP 409 conflicts are handled correctly;
+- queue messages are deleted after successful processing.
 
-### Objective
+## Status
 
-Prepare for future product enhancements without disrupting the MVP.
+🔄 Planned
 
-### Scope
+---
 
-- detailed role and permission auditing;
+# 6. Phase 4 — Event Querying
+
+## Objective
+
+Provide access to persisted audit data.
+
+## Scope
+
+- event search APIs;
+- organization-scoped filtering;
+- pagination;
+- sorting;
+- query optimization.
+
+## Deliverables
+
+- GetAuditEvents;
+- GetUserAuditEvents;
+- GetDictationAuditEvents;
+- continuation token support.
+
+## Exit Criteria
+
+The phase is complete when:
+
+- queries return correct results;
+- organization isolation is enforced;
+- query performance is acceptable.
+
+## Status
+
+⏳ Planned
+
+---
+
+# 7. Phase 5 — Operational Audit Reporting
+
+## Objective
+
+Deliver the first operational reports.
+
+## Reports
+
+- Access Audit Report;
+- Detailed Transcription Report;
+- Dictation Status History Report;
+- User Activity Audit Report.
+
+## Deliverables
+
+- reporting services;
+- authorization rules;
+- CSV export;
+- Excel export.
+
+## Exit Criteria
+
+The phase is complete when:
+
+- all reports are functional;
+- exports are available;
+- organization isolation is validated.
+
+## Status
+
+⏳ Planned
+
+---
+
+# 8. Phase 6 — Productivity Reporting
+
+## Objective
+
+Provide productivity and work-time analysis.
+
+## Reports
+
+- Time Analysis Report;
+- True Productivity Report;
+- Report Usage Report.
+
+## Deliverables
+
+- duration calculations;
+- productivity metrics;
+- report filtering enhancements.
+
+## Exit Criteria
+
+The phase is complete when:
+
+- productivity calculations are reproducible;
+- duplicate events do not inflate metrics;
+- metrics are accepted by stakeholders.
+
+## Status
+
+⏳ Planned
+
+---
+
+# 9. Phase 7 — Production Hardening
+
+## Objective
+
+Prepare the platform for production deployment.
+
+## Scope
+
+- Application Insights;
+- operational dashboards;
+- retry validation;
+- poison message handling;
+- backup validation;
+- disaster recovery review;
+- performance validation.
+
+## Deliverables
+
+- operational monitoring;
+- runbooks;
+- alerting;
+- production readiness checklist.
+
+## Exit Criteria
+
+The phase is complete when:
+
+- monitoring is operational;
+- failures are observable;
+- recovery procedures are documented;
+- performance targets are met.
+
+## Status
+
+⏳ Planned
+
+---
+
+# 10. Future Extensions
+
+Future versions may include:
+
+- role auditing;
+- permission auditing;
 - user administration auditing;
-- detailed audio access auditing;
+- audio auditing;
 - report export auditing;
-- AI assistance auditing;
+- AI auditing;
 - speech recognition auditing;
-- long-term retention governance;
-- Microsoft Fabric ingestion;
-- Power BI or equivalent reporting;
+- Microsoft Fabric integration;
+- Power BI integration;
 - anomaly detection;
-- advanced analytics.
+- advanced analytics;
+- long-term archival.
 
-### Notes
+These features are outside MVP scope.
 
-These features are not part of the MVP and should be implemented only after:
+---
 
-- retention rules are defined;
-- privacy impact is assessed;
-- business value is validated;
-- operational stakeholders confirm the requirements;
-- the cost and complexity of the solution are understood.
+# 11. Dependencies
 
-## 7. Dependencies
+Current architecture assumes:
 
-The roadmap depends on the following decisions:
+- gRPC transport;
+- Azure Storage Queue;
+- Azure Cosmos DB;
+- OrganizationId-based isolation;
+- AuthenticationToken validation at the gRPC boundary;
+- asynchronous processing.
 
-- validated event catalog;
-- validated event model;
-- validated storage strategy;
-- approval of the gRPC contract;
-- selection of the queue technology;
-- definition of Azure Cosmos DB partitioning and indexing;
-- approval of authentication and authorization standards;
-- approval of retention requirements;
-- definition of performance and throughput requirements.
+---
 
-## 8. Delivery principles
+# 12. Delivery Principles
 
 The roadmap follows these principles:
 
 - keep the MVP narrow and valuable;
-- avoid building analytical complexity before operational traceability;
-- separate transactional audit storage from future analytics workloads;
-- keep the event model stable and versioned;
-- prioritize reproducibility and auditability over feature breadth;
-- design for future extension without breaking the MVP.
+- prioritize traceability over advanced analytics;
+- preserve immutable audit records;
+- prioritize organization isolation;
+- use asynchronous processing;
+- maintain contract compatibility;
+- design for future extensibility.
 
-## 9. Current status
+---
 
-### Status summary
+# 13. Current Status
 
 | Area | Status |
-|---|---|
-| Event model | ✅ Defined |
-| Event catalog | ✅ Defined |
-| Requirements | ✅ Defined |
-| Reports | ✅ Defined |
-| Architecture | 🔄 In progress |
-| MVP implementation | ⏳ Planned |
-| Long-term retention | 📌 Future |
+|--------|--------|
+| Requirements | ✅ Complete |
+| Event Model | ✅ Complete |
+| Event Catalog | ✅ Complete |
+| Reports | ✅ Complete |
+| Architecture | ✅ Complete |
+| Authentication Strategy | ✅ Complete |
+| Queue Architecture | ✅ Complete |
+| Cosmos DB Design | ✅ Complete |
+| Event Ingestion | 🔄 In Progress |
+| Persistence | ⏳ Planned |
+| Reporting | ⏳ Planned |
+| Production Hardening | ⏳ Planned |
 | Microsoft Fabric | 📌 Future |
 
-## 10. Definition of done
+---
 
-The project is ready for implementation when:
+# 14. Definition of Done
 
-- the MVP event catalog is approved;
-- the event model is approved;
-- the requirements are approved;
-- the report definitions are approved;
-- the architecture is approved;
-- the gRPC contract is approved;
-- the queue and persistence technologies are selected;
-- the retention policy is defined;
-- operational stakeholders approve the MVP scope;
-- performance and security reviews are completed.
+The MVP is complete when:
 
-## 11. Future watchlist
+- events can be published through gRPC;
+- AuthenticationToken is validated;
+- OrganizationId, GroupId and UserId are extracted successfully;
+- events are published to Azure Storage Queue;
+- events are persisted to Azure Cosmos DB;
+- duplicate deliveries are handled safely;
+- organization isolation is enforced;
+- operational reports are available;
+- CSV exports are available;
+- Excel exports are available;
+- monitoring is operational;
+- performance is acceptable.
 
-The following items deserve continued attention:
+---
 
-- retention and archival regulation changes;
-- privacy law and contractual obligations;
-- new operational reporting needs;
-- emerging Azure platform capabilities;
-- changing customer expectations around reporting and traceability;
-- future application integrations;
-- growth in audit event volume.
+# 15. Current Priorities
 
-## 12. Roadmap summary
+1. Implement CosmosAuditRepository.
+2. Persist queue messages to Cosmos DB.
+3. Implement idempotency handling.
+4. Delete queue messages after successful persistence.
+5. Add Application Insights observability.
+6. Implement the Access Audit Report.
 
-The project is intentionally designed to be simple and focused.
+---
 
-The success of the MVP will be measured by the ability to provide trustworthy audit answers to the organization, without prematurely building a long-term analytics platform.
+# 16. Roadmap Summary
 
-The next major milestone is the approval of the architecture and the event contract before implementation begins.
+The architecture is validated.
+
+The platform is now in the implementation phase.
+
+The immediate objective is to complete the end-to-end processing path:
+
+```text
+gRPC
+    ↓
+Authentication
+    ↓
+Azure Storage Queue
+    ↓
+AuditQueueProcessor
+    ↓
+Azure Cosmos DB
+```
+
+before expanding into query APIs and reporting capabilities.
