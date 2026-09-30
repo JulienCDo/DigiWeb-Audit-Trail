@@ -16,17 +16,22 @@ The audit trail must support:
 
 The audit trail is the official transactional source for audit data. Microsoft Fabric and other analytics platforms may be integrated in a future phase, but they must not replace the transactional audit service.
 
+---
+
 ## 2. Scope
 
 The MVP covers the following applications:
 
-- DigiWeb only;
+- DigiWeb;
+- DigiConsole (initial integration may follow DigiWeb implementation).
 
 All applications must publish audit events through the centralized Audit Service.
 
 Applications must not write directly to the audit database or modify existing audit events.
 
-## 3. MVP business questions
+---
+
+## 3. MVP Business Questions
 
 The MVP must reliably answer the following questions:
 
@@ -39,12 +44,14 @@ The MVP must reliably answer the following questions:
 7. How much time did a user spend working on a dictation?
 8. Which reports were executed?
 
-## 4. MVP event requirements
+---
+
+## 4. MVP Event Requirements
 
 The MVP includes the following event types:
 
 | Event | Purpose | Required for |
-|---|---|---|
+|---------|---------|---------|
 | `LOGIN` | Records a successful or failed login attempt | Security and user activity |
 | `LOGOUT` | Records a user logout | Security and user activity |
 | `DICTATION_ACCESSED` | Records access to a dictation | Access audit |
@@ -55,39 +62,59 @@ The MVP includes the following event types:
 | `WORK_SESSION` | Records the start or end of a work session | Time and productivity analysis |
 | `REPORT_EXECUTED` | Records the execution of an audit or operational report | Report usage audit |
 
-Each event must use the canonical event model defined in [`02-event-model.md`](./02-event-model.md).
+Each event must use the canonical event model defined in `02-event-model.md`.
 
-## 5. Functional requirements
+---
 
-### FR-001 — Centralized event ingestion
+## 5. Functional Requirements
 
-The system must provide a centralized Audit Service for receiving events from DigiWeb.
+### FR-001 — Centralized Event Ingestion
 
-### FR-002 — Application authentication
+The system must provide a centralized Audit Service for receiving events from DigiWeb and DigiConsole.
+
+---
+
+### FR-002 — Application Authentication
 
 The Audit Service must authenticate calling applications before accepting audit events.
 
-### FR-003 — Event validation
+---
+
+### FR-003 — Event Validation
 
 The Audit Service must validate each event against:
 
 - the canonical event model;
 - the event type;
 - the required fields for that event;
-- the tenant context;
+- the organization context;
 - the supported event version.
+
+Identity information must be derived exclusively from the validated AuthenticationToken.
+
+The client must never provide OrganizationId, GroupId or UserId directly.
 
 Invalid events must be rejected and logged for technical investigation.
 
-### FR-004 — Tenant association
+---
 
-Every event must be associated with a tenant.
+### FR-004 — Organization Association
 
-The service must prevent an application from publishing an event for a tenant it is not authorized to access.
+Every event must be associated with an OrganizationId.
 
-### FR-005 — Actor identification
+OrganizationId must be extracted from the validated AuthenticationToken.
+
+The service must prevent an application from publishing events outside the authenticated organization scope.
+
+OrganizationId is the primary isolation boundary of the audit platform.
+
+---
+
+### FR-005 — Actor Identification
 
 Each event must identify the actor responsible for the action when applicable.
+
+For authenticated user actions, UserId and GroupId are extracted from the validated AuthenticationToken.
 
 The actor may be:
 
@@ -98,7 +125,9 @@ The actor may be:
 
 System-generated events must not require a human user identifier.
 
-### FR-006 — Target identification
+---
+
+### FR-006 — Target Identification
 
 Events concerning a business object must identify the target entity whenever applicable.
 
@@ -110,11 +139,15 @@ Examples include:
 - report;
 - user.
 
+---
+
 ### FR-007 — Immutability
 
 Once accepted, an audit event must not be modified or deleted through normal application operations.
 
 Any correction or additional context must be represented by a new event.
+
+---
 
 ### FR-008 — Correlation
 
@@ -122,37 +155,47 @@ Events belonging to the same business operation must support correlation through
 
 This allows investigators to reconstruct a complete workflow across services.
 
-### FR-009 — Event ordering
+---
+
+### FR-009 — Event Ordering
 
 The system must preserve the event timestamp supplied by the originating application and provide a deterministic ordering strategy for events with identical timestamps.
 
 The storage sequence must not replace the original business event timestamp.
 
-### FR-010 — Event search
+---
+
+### FR-010 — Event Search
 
 Authorized consumers must be able to search audit events using supported filters, including:
 
-- tenant;
+- organization;
 - date range;
 - event type;
 - actor;
 - target entity;
 - correlation identifier.
 
-### FR-011 — Report generation
+---
 
-The reporting layer must use audit events to generate the reports defined in [`04-reports.md`](./04-reports.md).
+### FR-011 — Report Generation
 
-### FR-012 — Access control
+The reporting layer must use audit events to generate the reports defined in `04-reports.md`.
+
+---
+
+### FR-012 — Access Control
 
 Audit data and reports must be accessible only to authorized users and services.
 
 Access must be evaluated according to:
 
-- tenant;
+- organization;
 - user role;
 - report permissions;
 - requested data scope.
+
+---
 
 ### FR-013 — Export
 
@@ -163,13 +206,17 @@ The reporting layer should support, at minimum:
 
 Export functionality must respect the same authorization rules as on-screen report access.
 
-## 6. Non-functional requirements
+---
+
+## 6. Non-Functional Requirements
 
 ### NFR-001 — Performance
 
 Audit publication must not noticeably slow down normal DigiWeb or DigiConsole operations.
 
-The preferred implementation is asynchronous processing through an internal queue.
+The preferred implementation is asynchronous processing through Azure Storage Queue.
+
+---
 
 ### NFR-002 — Availability
 
@@ -177,11 +224,19 @@ The Audit Service must be available independently from the business services tha
 
 Temporary storage or processing failures must not silently result in lost events.
 
+---
+
 ### NFR-003 — Durability
 
 Accepted events must be durably stored in Azure Cosmos DB.
 
 An event must not be acknowledged as successfully accepted before the system has persisted it or placed it in a durable processing mechanism.
+
+Queue publication is the acknowledgement boundary.
+
+An event must not be considered accepted until it has been successfully published to the queue.
+
+---
 
 ### NFR-004 — Security
 
@@ -190,9 +245,13 @@ The system must provide:
 - authenticated application-to-service communication;
 - encrypted communication;
 - role-based access to reports;
-- tenant isolation;
+- organization isolation;
 - least-privilege access to storage;
-- protection against unauthorized modification.
+- protection against unauthorized modification;
+- AuthenticationToken validation at the gRPC boundary;
+- prevention of token persistence.
+
+---
 
 ### NFR-005 — Privacy
 
@@ -210,11 +269,15 @@ The following data must not be stored unnecessarily:
 
 IP addresses and workstation information may be recorded only when permitted by applicable customer policies and regulations.
 
+---
+
 ### NFR-006 — Scalability
 
 The solution must support increasing event volumes without requiring direct access to the audit database from business applications.
 
 The ingestion and reporting paths should be scalable independently.
+
+---
 
 ### NFR-007 — Compatibility
 
@@ -224,30 +287,38 @@ Adding an optional field must not break existing producers or consumers.
 
 Breaking changes must require a new event contract version.
 
+---
+
 ### NFR-008 — Retention
 
 Audit retention must be configurable according to customer, contractual, legal, and regulatory requirements.
 
 The detailed retention and archival strategy is outside the MVP implementation scope and must be documented before production deployment.
 
-### NFR-009 — Time standard
+---
+
+### NFR-009 — Time Standard
 
 All event timestamps must be stored in UTC using ISO 8601 format.
 
-### NFR-010 — Data integrity
+---
+
+### NFR-010 — Data Integrity
 
 The system must provide mechanisms to detect:
 
 - malformed events;
 - missing required fields;
 - duplicate events;
-- invalid tenant associations;
+- invalid organization associations;
 - unsupported event versions;
 - incomplete processing.
 
+---
+
 ## 7. Nice To Have
 
-### NTH-001 — Audit service observability
+### NTH-001 — Audit Service Observability
 
 The Audit Service must provide operational telemetry for:
 
@@ -258,7 +329,9 @@ The Audit Service must provide operational telemetry for:
 - queue depth;
 - processing latency;
 - storage failures;
-- tenant or application identification.
+- organization or application identification.
+
+---
 
 ### NTH-002 — Idempotency
 
@@ -268,7 +341,11 @@ If the same event is submitted more than once, the service must not create dupli
 
 The event identifier must be used as the idempotency key.
 
-### NTH-003 — Failure handling
+Duplicate deliveries detected through the event identifier must not be considered processing errors.
+
+---
+
+### NTH-003 — Failure Handling
 
 If an audit event cannot be accepted, the originating application must receive a clear technical response.
 
@@ -276,15 +353,17 @@ The failure must not expose sensitive event data.
 
 The system must provide a reliable retry mechanism for transient failures.
 
-### NTH-004 — Event ordering
+---
+
+### NTH-004 — Event Ordering
 
 The system must preserve the event timestamp supplied by the originating application and provide a deterministic ordering strategy for events with identical timestamps.
 
 The storage sequence must not replace the original business event timestamp.
-  
-## 8. MVP reports
 
-The MVP reporting layer must support:
+---
+
+## 8. MVP Reports
 
 ### Access Audit Report
 
@@ -368,7 +447,9 @@ Uses:
 
 - `REPORT_EXECUTED`
 
-## 8. Out of scope for the MVP
+---
+
+## 9. Out Of Scope For The MVP
 
 The following features are excluded from the MVP:
 
@@ -385,15 +466,12 @@ The following features are excluded from the MVP:
 - advanced historical analytics;
 - long-term archival implementation;
 - customer-specific retention exceptions.
-- DigiConsole can publish events through the Audit Service;
-- duplicate submissions are handled safely;
-- transient processing failures can be retried;
-- performance impact has been measured and accepted;
-- retention and archival rules have been approved before production deployment.
 
 These features may be considered in future phases.
 
-## 9. MVP acceptance criteria
+---
+
+## 10. MVP Acceptance Criteria
 
 The MVP is considered functionally complete when:
 
@@ -401,9 +479,15 @@ The MVP is considered functionally complete when:
 - each event has a documented contract;
 - DigiWeb can publish events through the Audit Service;
 - events are validated before storage;
-- events are associated with a tenant;
+- events are associated with an organization;
 - accepted events are immutable;
 - authorized users can search events;
 - the seven MVP reports can be generated;
 - CSV and Excel exports are available where applicable;
-- tenant isolation has been tested;
+- organization isolation has been tested;
+- AuthenticationToken is validated at the gRPC boundary;
+- OrganizationId, GroupId and UserId are extracted from the token;
+- AuthenticationToken is never stored, queued or logged;
+- accepted events are published to Azure Storage Queue before acknowledgement;
+- accepted events are persisted to Azure Cosmos DB asynchronously;
+- duplicate event submissions are handled safely through idempotency.
