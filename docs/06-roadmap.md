@@ -109,7 +109,7 @@ The phase is complete when:
 
 ## Status
 
-🔄 In Progress
+✅ Completed
 
 ---
 
@@ -131,10 +131,10 @@ Persist accepted events to Azure Cosmos DB.
 
 ## Deliverables
 
-- CosmosAuditRepository;
+- CosmosAuditEventRepository;
 - AuditQueueProcessor;
+- CosmosInitializationService;
 - duplicate detection;
-- Application Insights instrumentation.
 
 ## Exit Criteria
 
@@ -148,7 +148,7 @@ The phase is complete when:
 
 ## Status
 
-🔄 Planned
+✅ Completed
 
 ---
 
@@ -291,6 +291,32 @@ The phase is complete when:
 
 ---
 
+# Production Backlog
+
+## Security
+
+- Replace Cosmos DB connection strings with Managed Identity.
+- Introduce Azure RBAC for Cosmos DB access.
+
+## Architecture
+
+- Move AuditQueueProcessor into a dedicated worker service.
+- Allow independent scaling of ingestion and persistence.
+
+## Reliability
+
+- Add dead-letter queue support.
+- Improve poison message handling.
+
+## Observability
+
+- Application Insights integration.
+- Queue depth monitoring.
+- Cosmos Request Unit monitoring.
+- Processing latency metrics.
+
+---
+
 # 10. Future Extensions
 
 Future versions may include:
@@ -351,8 +377,8 @@ The roadmap follows these principles:
 | Authentication Strategy | ✅ Complete |
 | Queue Architecture | ✅ Complete |
 | Cosmos DB Design | ✅ Complete |
-| Event Ingestion | 🔄 In Progress |
-| Persistence | ⏳ Planned |
+| Event Ingestion | ✅ Complete |
+| Persistence | ✅ Complete |
 | Reporting | ⏳ Planned |
 | Production Hardening | ⏳ Planned |
 | Microsoft Fabric | 📌 Future |
@@ -373,19 +399,19 @@ The MVP is complete when:
 - operational reports are available;
 - CSV exports are available;
 - Excel exports are available;
-- monitoring is operational;
+- operational logging is available;
 - performance is acceptable.
 
 ---
 
 # 15. Current Priorities
 
-1. Implement CosmosAuditRepository.
-2. Persist queue messages to Cosmos DB.
-3. Implement idempotency handling.
-4. Delete queue messages after successful persistence.
-5. Add Application Insights observability.
-6. Implement the Access Audit Report.
+1. Validate end-to-end processing.
+2. Add Application Insights observability.
+3. Implement poison message handling.
+4. Implement audit search APIs.
+5. Implement the Access Audit Report.
+6. Validate Cosmos query patterns.
 
 ---
 
@@ -395,18 +421,12 @@ The architecture is validated.
 
 The platform is now in the implementation phase.
 
-The immediate objective is to complete the end-to-end processing path:
+The end-to-end ingestion and persistence path is implemented.
 
-```text
-gRPC
-    ↓
-Authentication
-    ↓
-Azure Storage Queue
-    ↓
-AuditQueueProcessor
-    ↓
-Azure Cosmos DB
-```
+Current focus is shifting toward:
 
-before expanding into query APIs and reporting capabilities.
+- event querying;
+- operational reporting;
+- observability;
+- production hardening.
+
