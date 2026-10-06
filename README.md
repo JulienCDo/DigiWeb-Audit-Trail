@@ -330,9 +330,11 @@ The event contract must remain versioned to support future evolution.
 
 # Current Priorities
 
-1. Implement Cosmos persistence.
-2. Complete queue processing.
-3. Implement idempotency handling.
-4. Add Application Insights observability.
+1. Validate end-to-end processing.
+2. Add Application Insights observability.
+3. Implement poison message handling.
+4. Implement the Access Audit Report.
+5. Implement audit search capabilities.
+6. Extract AuditQueueProcessor into a dedicated worker service.
 5. Implement the Access Audit Report.
 6. Validate end-to-end processing.
