@@ -72,7 +72,7 @@ The processor has no dependency on authentication services.
 
 AuditQueueMessage contains:
 
-- AuditEventId
+- Id
 - TimestampUtc
 - OrganizationId
 - GroupId
@@ -114,7 +114,7 @@ Rules:
 Database:
 
 ```text
-SynnefoAudit
+AuditTRail
 ```
 
 Container:
@@ -132,7 +132,7 @@ Partition Key:
 Document Id:
 
 ```text
-AuditEventId
+Id
 ```
 
 Minimum document fields:
@@ -243,11 +243,41 @@ A future release may move the processor into a dedicated Worker Service.
 
 ---
 
+## Cosmos Initialization
+
+Decision:
+
+The application automatically creates the AuditTrail
+database and AuditEvents container when they do not exist.
+
+Rationale:
+
+- simplify environment provisioning;
+- reduce manual setup;
+- align with Azure Storage Queue initialization.
+
+---
+
+## Managed Identity Deferred
+
+Decision:
+
+Cosmos DB currently uses a connection string.
+
+Managed Identity and Azure RBAC are planned for a future phase.
+
+Rationale:
+
+- reduce implementation complexity for the MVP;
+- preserve a migration path toward secretless authentication.
+
+---
+
 ## Current Priorities
 
-1. Implement CosmosAuditRepository.SaveAsync().
-2. Persist queue events to Cosmos DB.
-3. Complete idempotency handling.
-4. Delete queue messages after successful processing.
+1. Validate end-to-end processing.
+2. Validate Cosmos query patterns.
+3. Implement audit search APIs.
+4. Implement the Access Audit Report.
 5. Add Application Insights observability.
-6. Implement the Access Audit Report.
+6. Implement poison message handling.
