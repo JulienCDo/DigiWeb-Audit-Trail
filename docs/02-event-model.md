@@ -14,7 +14,7 @@ The model is designed to provide:
 - event immutability;
 - contract versioning;
 - idempotent processing;
-- compatibility with Azure Cosmos DB.
+- compatibility with Azure  DB.
 
 ---
 
@@ -103,7 +103,7 @@ Example:
 
 ```json
 {
-  "auditEventId": "8e3a7d7c-9d67-4dc9-a337-cf1d4e44dc5",
+  "id": "8e3a7d7c-9d67-4dc9-a337-cf1d4e44dc5",
   "timestampUtc": "2026-09-23T15:30:22.000Z",
   "organizationId": "6c8cb3a5-022a-4779-89f8-5d2806379b8f",
   "groupId": "2785c132-7c39-4fe2-b4bd-8550478a17c0",
@@ -125,10 +125,9 @@ The Azure Storage Queue message contains:
 
 | Field | Type | Required | Description |
 |---------|---------|---------|---------|
-| AuditEventId | Guid | Yes | Unique audit identifier. |
+| Id | Guid | Yes | Unique audit identifier. |
 | TimestampUtc | DateTime | Yes | Business event timestamp. |
 | OrganizationId | Guid | Yes | Organization isolation boundary. |
-| GroupId | Guid | Yes | Group associated with the actor. |
 | UserId | Guid | Yes | User associated with the actor. |
 | ApplicationId | Enum | Yes | Originating application. |
 | EventType | String | Yes | Event catalog value. |
@@ -138,14 +137,14 @@ The queue message never contains AuthenticationToken.
 
 ---
 
-## 6. Cosmos Document
+## 6.  Document
 
-Events are persisted in Azure Cosmos DB.
+Events are persisted in Azure  DB.
 
 Database:
 
 ```text
-SynnefoAudit
+AuditTrail
 ```
 
 Container:
