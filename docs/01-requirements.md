@@ -353,6 +353,8 @@ The failure must not expose sensitive event data.
 
 The system must provide a reliable retry mechanism for transient failures.
 
+Future implementations should support poison message handling and dead-letter queue processing for unrecoverable events.
+
 ---
 
 ### NTH-004 — Event Ordering
