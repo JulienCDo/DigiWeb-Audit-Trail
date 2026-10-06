@@ -379,6 +379,12 @@ Records the execution of a report.
 
 ## 5. Event Production Rules
 
+### Asynchronous Persistence
+
+Successful publication of an event does not imply immediate persistence in Azure Cosmos DB.
+
+Events are first published to Azure Storage Queue and are persisted asynchronously by the audit processing pipeline.
+
 ### Successful Operations
 
 Business events should be published only after the business operation has been accepted.
@@ -391,7 +397,7 @@ Failure events may be published when required for security, traceability or oper
 
 Applications may retry event publication.
 
-AuditEventId is the idempotency key.
+Id is the idempotency key.
 
 Duplicate deliveries must not create duplicate records.
 
