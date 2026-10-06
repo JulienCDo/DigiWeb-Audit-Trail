@@ -172,6 +172,10 @@ Queue messages are deleted only after:
 - successful persistence;
 - confirmed duplicate detection.
 
+ Duplicate detection is performed using the audit event identifier stored as the Cosmos document id.
+
+Duplicate processing attempts must not create multiple records.
+
 ---
 
 ## 5. Components
@@ -187,7 +191,7 @@ Responsibilities:
 
 - identify business actions;
 - create audit requests;
-- generate AuditEventId;
+- generate Id;
 - provide AuthenticationToken;
 - submit events through gRPC;
 - retry transient failures.
@@ -248,7 +252,7 @@ Persistence remains asynchronous.
 Request:
 
 ```text
-AuditEventId
+Id
 EventVersion
 TimestampUtc
 AuthenticationToken
@@ -263,7 +267,7 @@ Response:
 SynnefoAPIStatus
 ```
 
-AuditEventId is not returned.
+Id is not returned.
 
 ---
 
@@ -276,4 +280,70 @@ Azure Storage Queue provides:
 - asynchronous processing;
 - temporary failure protection.
 
-Responsibilities
+Responsibilities:
+
+- durable buffering;
+- temporary failure protection;
+- decoupling ingestion from persistence;
+- support for asynchronous processing;
+- retry handling.
+
+### 5.4 AuditQueueProcessor
+
+AuditQueueProcessor is responsible for processing queued audit events.
+
+Responsibilities:
+
+- read Azure Storage Queue messages;
+- deserialize audit events;
+- persist events to Azure Cosmos DB;
+- remove successfully processed messages;
+- ignore duplicate events detected through Cosmos idempotency rules.
+
+Current implementation:
+
+AuditQueueProcessor is hosted as a BackgroundService within the Audit Service host.
+
+Future versions may move processing into a dedicated worker service without changing the architecture.
+
+### 5.5 Cosmos Initialization
+
+The application initializes Cosmos DB structures at startup.
+
+Responsibilities:
+
+- ensure AuditTrail database exists;
+- ensure AuditEvents container exists;
+- ensure the approved partition key is configured.
+
+This allows new environments to be provisioned automatically by the application.
+
+## Future Improvements
+
+### Managed Identity
+
+Replace Cosmos DB connection strings with Azure Managed Identity and Azure RBAC permissions.
+
+### Dedicated Worker Service
+
+Move AuditQueueProcessor to a dedicated worker host.
+
+Benefits:
+
+- independent scaling;
+- independent deployments;
+- improved resiliency.
+
+### Dead Letter Queue
+
+Introduce poison message handling for unrecoverable queue messages.
+
+### Observability
+
+Add Application Insights metrics for:
+
+- accepted events;
+- duplicate events;
+- queue depth;
+- processing latency;
+- Cosmos DB request units.
