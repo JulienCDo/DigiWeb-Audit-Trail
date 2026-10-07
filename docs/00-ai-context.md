@@ -1,6 +1,8 @@
-# AI Context
+# Synnefo Audit Project Context
 
-Authoritative document order:
+## Source of Truth
+
+Document precedence:
 
 1. Architecture-Decisions.md
 2. 05-architecture.md
@@ -10,19 +12,57 @@ Authoritative document order:
 6. 01-requirements.md
 7. 06-roadmap.md
 
-Current implementation status:
+## Current Status
 
-✅ Queue ingestion complete
-✅ Cosmos persistence complete
-✅ Idempotency complete
+Completed:
 
-Next phase:
+- gRPC ingestion
+- Authentication token validation
+- Identity extraction
+- Azure Storage Queue publication
+- AuditQueueProcessor
+- Cosmos DB persistence
+- Idempotency handling
+- CosmosInitializationService
+
+Current phase:
 
 Phase 4 - Event Querying
 
-Known technical debt:
+## Approved Architecture
 
-- Managed Identity
+Application
+↓
+Audit gRPC API
+↓
+Azure Storage Queue
+↓
+AuditQueueProcessor
+↓
+Azure Cosmos DB
+↓
+Reports
+
+## Approved Decisions
+
+- Azure Storage Queue
+- Azure Cosmos DB
+- Partition Key = /organizationId
+- Idempotency via document id
+- Queue publication is the acknowledgement boundary
+- Asynchronous persistence
+- Organization isolation
+
+## Technical Debt
+
+- Managed Identity for Cosmos DB
 - Dedicated Worker Service
 - Dead Letter Queue
-- Application Insights
+- Application Insights observability
+
+## Important Notes
+
+- Identity comes from AuthenticationToken.
+- Applications never write directly to Cosmos.
+- AuthenticationToken is never stored.
+- Cosmos DB is the system of record.
